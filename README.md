@@ -43,4 +43,5 @@ Admin
 |Name | Varchar(70) | NOT NULL |
 |Email|Varchar(50|NOT NULL |
 |Password|Varchar(50)|NOT NULL|
+|Role| VarChar(25)| 'Auth', 'Admin'|
 |Status| BOOLEAN| 
