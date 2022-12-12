@@ -4,7 +4,9 @@
   "description": "PatientInfo\r | Property     | Type | References | \r | ---------------- | :--: | :--: |\r |Id | Int | Primary Key - NOT NULL - AUTOINCREMENT \r |FullName | Varchar(70) | NOT NULL |\r |User_Id| INT| NOT NULL - FOREING KEY|\r |Birthdate| Date | Not null|\r |Status| BOOLEAN|",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "dev": "concurrently \"tsc --watch\" \"nodemon dist/index.js\" "
   },
   "repository": {
     "type": "git",
