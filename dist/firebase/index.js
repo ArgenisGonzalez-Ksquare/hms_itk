@@ -31,28 +31,51 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const dotenv_1 = __importDefault(require("dotenv"));
-dotenv_1.default.config();
-/* import { startSequelize  } from './models'; */
-const app_1 = __importDefault(require("./app"));
-/* import envs from './models/configDBs' */
+exports.disableUser = exports.updateUser = exports.getAllUsers = exports.readUser = exports.createUser = void 0;
 const admin = __importStar(require("firebase-admin"));
-const PORT = process.env.PORT;
-admin.initializeApp();
-/* const envRunning = process.env.ENVIRONMENT === 'testing' ? envs.test  : envs.dev  */
-app_1.default.listen(PORT, () => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        /*         const sequelize = startSequelize(envRunning.database, envRunning.passwd, envRunning.host, envRunning.username);
-                await sequelize.sync({ force: process.env.ENVIRONMENT === 'testing' }); */
-        console.info('DB and Express server is up and running!!!!');
-        /* console.info(process.env.ENVIRONMENT) */
-    }
-    catch (error) {
-        console.error(error);
-        process.abort();
-    }
-}));
+const mapToUser = (user) => {
+    const customClaims = (user.customClaims || { role: "" });
+    const role = customClaims.role ? customClaims.role : "";
+    return {
+        uid: user.uid,
+        email: user.email,
+        userName: user.displayName,
+        role,
+        isDisableL: user.disabled
+    };
+};
+const createUser = (displayName, email, password, role) => __awaiter(void 0, void 0, void 0, function* () {
+    const { uid } = yield admin.auth().createUser({
+        displayName,
+        email,
+        password
+    });
+    yield admin.auth().setCustomUserClaims(uid, { role });
+    return uid;
+});
+exports.createUser = createUser;
+const readUser = (uid) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield admin.auth().getUser(uid);
+    return mapToUser(user);
+});
+exports.readUser = readUser;
+const getAllUsers = () => __awaiter(void 0, void 0, void 0, function* () {
+    const listOfUsers = yield admin.auth().listUsers(10);
+    const users = listOfUsers.users.map(mapToUser);
+    return users;
+});
+exports.getAllUsers = getAllUsers;
+const updateUser = (uid, displayName) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield admin.auth().updateUser(uid, {
+        displayName
+    });
+    return mapToUser(user);
+});
+exports.updateUser = updateUser;
+const disableUser = (uid, disabled) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield admin.auth().updateUser(uid, {
+        disabled
+    });
+});
+exports.disableUser = disableUser;

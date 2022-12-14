@@ -31,28 +31,41 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const dotenv_1 = __importDefault(require("dotenv"));
-dotenv_1.default.config();
-/* import { startSequelize  } from './models'; */
-const app_1 = __importDefault(require("./app"));
-/* import envs from './models/configDBs' */
+exports.isAuthenticated = void 0;
 const admin = __importStar(require("firebase-admin"));
-const PORT = process.env.PORT;
-admin.initializeApp();
-/* const envRunning = process.env.ENVIRONMENT === 'testing' ? envs.test  : envs.dev  */
-app_1.default.listen(PORT, () => __awaiter(void 0, void 0, void 0, function* () {
+const isAuthenticated = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    //No authorization Header
+    const { authorization } = req.headers;
+    if (!authorization) {
+        return res.status(401).send({
+            error: 'No Auth'
+        });
+    }
+    //No correct Schema (bearer)
+    if (!authorization.startsWith('Bearer')) {
+        return res.status(401).send({
+            error: 'No Auth'
+        });
+    }
+    //Check if the token is valid
+    const splittedToken = authorization.split('Bearer');
+    if (splittedToken.length !== 2) {
+        return res.status(401).send({
+            error: 'No Auth'
+        });
+    }
+    const token = splittedToken[1];
     try {
-        /*         const sequelize = startSequelize(envRunning.database, envRunning.passwd, envRunning.host, envRunning.username);
-                await sequelize.sync({ force: process.env.ENVIRONMENT === 'testing' }); */
-        console.info('DB and Express server is up and running!!!!');
-        /* console.info(process.env.ENVIRONMENT) */
+        const decodedToken = yield admin.auth().verifyIdToken(token);
+        res.locals = Object.assign(Object.assign({}, res.locals), { email: decodedToken.email, uid: decodedToken.uid, role: decodedToken.role });
+        return next(); //si cumple la funcion entonces se ejecuta el next
     }
     catch (error) {
         console.error(error);
-        process.abort();
+        res.status(401).send({
+            error: 'No Auth'
+        });
     }
-}));
+});
+exports.isAuthenticated = isAuthenticated;
