@@ -47,8 +47,7 @@ exports.UserRouter.get('/:userId', isAuthentificated_1.isAuthenticated, (0, isAu
         return res.status(500).send({ error: 'something went wrong' });
     }
 }));
-/*
-UserRouter.put('/disable/:uid', async (req: Request, res: Response) => {
+/* UserRouter.put('/disable/:uid', async (req: Request, res: Response) => {
     let uid = req.params.uid;
     const { disabled } = req.body;
 
@@ -59,7 +58,7 @@ UserRouter.put('/disable/:uid', async (req: Request, res: Response) => {
     }
 
     try {
-        const user = await disableUser(uid, disabled);
+        const user:any = await disableUser(uid, disabled);
         if (!user) {
             return res.status(400).send({
                 error: "invalid id"

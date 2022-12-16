@@ -5,9 +5,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const User_routes_1 = require("./routes/User.routes");
+const patienInfo_routes_1 = require("./routes/patienInfo.routes");
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
-app.use('/users', User_routes_1.UserRouter);
+app.use('/user', User_routes_1.UserRouter);
+app.use('/patient', patienInfo_routes_1.PatientInfo);
 app.get('/', (req, res) => {
     res.send('VIVEEEEEEEEEEE');
 });

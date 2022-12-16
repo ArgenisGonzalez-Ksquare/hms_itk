@@ -1,10 +1,16 @@
 import dotenv from 'dotenv';
 dotenv.config();
-/* import { startSequelize  } from './models'; */
+import { startSequelize  } from './models';
 import app from './app';
 /* import envs from './models/configDBs' */
 import * as admin from 'firebase-admin';
-const PORT = process.env.PORT;
+
+
+const PORT = <string>process.env.PORT;
+const DB = <string>process.env.DB_NAME;
+const PASSWD = <string>process.env.DB_PASS;
+const USER = <string>process.env.DB_USER;
+const HOST = <string>process.env.localhost;
 
 
 admin.initializeApp();
@@ -13,10 +19,10 @@ admin.initializeApp();
 
 app.listen(PORT, async () => {
     try {
-/*         const sequelize = startSequelize(envRunning.database, envRunning.passwd, envRunning.host, envRunning.username);
-        await sequelize.sync({ force: process.env.ENVIRONMENT === 'testing' }); */
+const sequelize = startSequelize(DB, PASSWD, HOST, USER);
+        await sequelize.sync(); 
         console.info('DB and Express server is up and running!!!!')
-        /* console.info(process.env.ENVIRONMENT) */
+        console.info(process.env.ENVIRONMENT)
     } catch (error) {
         console.error(error);
         process.abort();

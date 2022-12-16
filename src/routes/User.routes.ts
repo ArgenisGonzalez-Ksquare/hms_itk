@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import { createUser, disableUser, getAllUsers, readUser, updateUser } from "../firebase";
 import { isAuthenticated } from "../middlewares/isAuthentificated";
 import { isAuthorized } from "../middlewares/isAuthorized";
+import {Role} from '../firebase/index'
 
 export const UserRouter = Router();
 
@@ -46,8 +47,8 @@ UserRouter.get('/:userId', isAuthenticated, isAuthorized({roles: ['admin'], allo
      }
 })
 
-/* 
-UserRouter.put('/disable/:uid', async (req: Request, res: Response) => {
+
+/* UserRouter.put('/disable/:uid', async (req: Request, res: Response) => {
     let uid = req.params.uid;
     const { disabled } = req.body;
 
@@ -58,7 +59,7 @@ UserRouter.put('/disable/:uid', async (req: Request, res: Response) => {
     }
 
     try {
-        const user = await disableUser(uid, disabled);
+        const user:any = await disableUser(uid, disabled);
         if (!user) {
             return res.status(400).send({
                 error: "invalid id"

@@ -37,19 +37,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
-/* import { startSequelize  } from './models'; */
+const models_1 = require("./models");
 const app_1 = __importDefault(require("./app"));
 /* import envs from './models/configDBs' */
 const admin = __importStar(require("firebase-admin"));
 const PORT = process.env.PORT;
+const DB = process.env.DB_NAME;
+const PASSWD = process.env.DB_PASS;
+const USER = process.env.DB_USER;
+const HOST = process.env.localhost;
 admin.initializeApp();
 /* const envRunning = process.env.ENVIRONMENT === 'testing' ? envs.test  : envs.dev  */
 app_1.default.listen(PORT, () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        /*         const sequelize = startSequelize(envRunning.database, envRunning.passwd, envRunning.host, envRunning.username);
-                await sequelize.sync({ force: process.env.ENVIRONMENT === 'testing' }); */
+        const sequelize = (0, models_1.startSequelize)(DB, PASSWD, HOST, USER);
+        yield sequelize.sync();
         console.info('DB and Express server is up and running!!!!');
-        /* console.info(process.env.ENVIRONMENT) */
+        console.info(process.env.ENVIRONMENT);
     }
     catch (error) {
         console.error(error);

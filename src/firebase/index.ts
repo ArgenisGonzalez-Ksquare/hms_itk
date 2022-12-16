@@ -58,7 +58,7 @@ export const getAllUsers = async () => {
     return users;
 }
 
-export const updateUser = async (uid:string, displayName: string) => {
+export const updateUser = async (uid:string, displayName: string, email:string, password:string) => {
     const user = await admin.auth().updateUser(uid, {
         displayName
     })

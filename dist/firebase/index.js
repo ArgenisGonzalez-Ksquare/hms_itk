@@ -66,7 +66,7 @@ const getAllUsers = () => __awaiter(void 0, void 0, void 0, function* () {
     return users;
 });
 exports.getAllUsers = getAllUsers;
-const updateUser = (uid, displayName) => __awaiter(void 0, void 0, void 0, function* () {
+const updateUser = (uid, displayName, email, password) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield admin.auth().updateUser(uid, {
         displayName
     });
