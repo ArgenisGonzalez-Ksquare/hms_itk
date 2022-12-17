@@ -1,6 +1,7 @@
 import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes, Sequelize } from "sequelize";
+import { Appointment } from "./appointment.model";
 
-export class doctorInfo extends Model<InferAttributes<doctorInfo>, InferCreationAttributes<doctorInfo>> {
+export class DoctorInfo extends Model<InferAttributes<DoctorInfo>, InferCreationAttributes<DoctorInfo>> {
 
     declare id: CreationOptional<number>;
     declare FullName: string;
@@ -15,7 +16,7 @@ export class doctorInfo extends Model<InferAttributes<doctorInfo>, InferCreation
 }
 
 export const initDoctorInfo = (sequelize: Sequelize) => {
-    doctorInfo.init({
+    DoctorInfo.init({
     
         id: {
             type: DataTypes.INTEGER,
@@ -24,7 +25,7 @@ export const initDoctorInfo = (sequelize: Sequelize) => {
 
         },
         FullName: DataTypes.STRING,
-        UserId: DataTypes.NUMBER,
+        UserId: DataTypes.INTEGER,
         Birthdate: DataTypes.DATE,
         Status: {
             type: DataTypes.BOOLEAN,
@@ -34,5 +35,6 @@ export const initDoctorInfo = (sequelize: Sequelize) => {
 }, {
     sequelize // Instance of sequelize that reflects the connection
 })
+
 }
 

@@ -27,12 +27,6 @@ const initUser = (sequelize) => {
     }, {
         sequelize // Instance of sequelize that reflects the connection
     });
-    /*     User.hasMany(PatientInfo, {
-            foreignKey: 'user_id',
-        });
-    
-        PatientInfo.belongsTo(User, {
-        }); */
     User.hasMany(patientInfo_model_1.PatientInfo);
     patientInfo_model_1.PatientInfo.belongsTo(User);
 };

@@ -1,6 +1,6 @@
 import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes, Sequelize } from "sequelize";
 
-export class appointment extends Model<InferAttributes<appointment>, InferCreationAttributes<appointment>> {
+export class Appointment extends Model<InferAttributes<Appointment>, InferCreationAttributes<Appointment>> {
 
     declare id: CreationOptional<number>;
     declare PatientInfo_id: number;
@@ -15,7 +15,7 @@ export class appointment extends Model<InferAttributes<appointment>, InferCreati
 }
 
 export const initAppointmentInfo = (sequelize: Sequelize) => {
-    appointment.init({
+    Appointment.init({
     
         id: {
             type: DataTypes.INTEGER,
@@ -23,8 +23,8 @@ export const initAppointmentInfo = (sequelize: Sequelize) => {
             primaryKey: true
 
         },
-        PatientInfo_id: DataTypes.NUMBER,
-        DoctorInfo_id: DataTypes.NUMBER,
+        PatientInfo_id: DataTypes.INTEGER,
+        DoctorInfo_id: DataTypes.INTEGER,
         Date: DataTypes.DATE,
         Status: {
             type: DataTypes.BOOLEAN,
