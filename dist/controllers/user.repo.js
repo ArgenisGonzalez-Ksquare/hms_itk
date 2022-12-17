@@ -9,30 +9,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createPatientInfo = exports.listPatient = void 0;
+exports.createUserOnPostgres = void 0;
 const user_model_1 = require("../models/user.model");
-// Create operation
-const listPatient = (status) => __awaiter(void 0, void 0, void 0, function* () {
-    const res = yield user_model_1.User.findAll({
-        attributes: ['id'],
-        where: {
-            status: true
-        }
-    });
-    return res;
-});
-exports.listPatient = listPatient;
-const createPatientInfo = (display_name, email, password) => __awaiter(void 0, void 0, void 0, function* () {
+// Create operatio
+const createUserOnPostgres = (id, displayName, email, password, role) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const user = yield user_model_1.User.create({
-            display_name,
+            id,
+            displayName,
             email,
-            password
+            password,
+            role
         });
         return user;
     }
     catch (error) {
         console.error(error);
+        return null;
     }
 });
-exports.createPatientInfo = createPatientInfo;
+exports.createUserOnPostgres = createUserOnPostgres;

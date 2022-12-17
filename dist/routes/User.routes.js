@@ -9,24 +9,28 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserRouter = void 0;
+exports.User = exports.UserRouter = void 0;
 const express_1 = require("express");
 const firebase_1 = require("../firebase");
+const user_repo_1 = require("../controllers/user.repo");
 const isAuthentificated_1 = require("../middlewares/isAuthentificated");
 const isAuthorized_1 = require("../middlewares/isAuthorized");
 exports.UserRouter = (0, express_1.Router)();
+exports.User = (0, express_1.Router)();
 exports.UserRouter.post('/newUser', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // Info desde el body
     // Checar si falta info
     // Checar que el rol sea adecuado
-    const { displayName, email, password } = req.body;
+    const { uid, displayName, email, password, role } = req.body;
     if (!displayName || !email || !password) {
         return res.status(400).send({ error: 'Missing fields' });
     }
     try {
         const userId = yield (0, firebase_1.createUser)(displayName, email, password, 'patient');
-        res.status(201).send({
-            userId
+        console.log(userId);
+        const user = yield (0, user_repo_1.createUserOnPostgres)(userId, displayName, email, password, 'patient');
+        return res.status(201).send({
+            user
         });
     }
     catch (error) {

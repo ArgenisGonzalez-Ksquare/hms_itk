@@ -9,30 +9,48 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updatePatientById = exports.fetchPatientById = exports.createPatientInfo = exports.listPatient = void 0;
+exports.deletePatientById = exports.updatePatientById = exports.fetchPatientById = exports.createPatientInfo = exports.listPatient = exports.paginatedList = void 0;
 const patientInfo_model_1 = require("../models/patientInfo.model");
 // Create operation
-const listPatient = (status) => __awaiter(void 0, void 0, void 0, function* () {
+const paginatedList = (pLimit, pOffset) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const res = yield patientInfo_model_1.PatientInfo.findAll({
+            attributes: ['id', 'full_name', 'birthdate'],
+            limit: pLimit,
+            offset: pOffset,
+            where: {
+                is_active: true
+            }
+        });
+        return res;
+    }
+    catch (error) {
+        console.error(error);
+        return null;
+    }
+});
+exports.paginatedList = paginatedList;
+const listPatient = (is_active) => __awaiter(void 0, void 0, void 0, function* () {
     const res = yield patientInfo_model_1.PatientInfo.findAll({
-        attributes: ['id'],
+        attributes: ['id', 'full_name', 'birthdate'],
         where: {
-            status: true
+            is_active: true
         }
     });
     return res;
 });
 exports.listPatient = listPatient;
-const createPatientInfo = (full_name, user_id, birthdate) => __awaiter(void 0, void 0, void 0, function* () {
+const createPatientInfo = (full_name, birthdate) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const patient = yield patientInfo_model_1.PatientInfo.create({
             full_name,
-            user_id,
-            birthdate
+            birthdate,
         });
         return patient;
     }
     catch (error) {
         console.error(error);
+        return null;
     }
 });
 exports.createPatientInfo = createPatientInfo;
@@ -52,7 +70,7 @@ const updatePatientById = (id, patientModel) => __awaiter(void 0, void 0, void 0
         const foo = yield patientInfo_model_1.PatientInfo.update({
             full_name: patientModel.full_name,
             birthdate: patientModel.birthdate,
-            status: patientModel.status
+            is_active: patientModel.is_active
         }, {
             where: {
                 id: id
@@ -66,18 +84,20 @@ const updatePatientById = (id, patientModel) => __awaiter(void 0, void 0, void 0
     }
 });
 exports.updatePatientById = updatePatientById;
-/*
-export const deleteTodoById = async (id: number) => {
+const deletePatientById = (id) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const foo = await Todo.destroy({
+        const foo = yield patientInfo_model_1.PatientInfo.update({
+            is_active: false
+        }, {
             where: {
                 id: id
             }
-        })
-        console.log(foo);
+        });
         return foo;
-    } catch (error) {
+    }
+    catch (error) {
         console.error(error);
         return null;
     }
-} */ 
+});
+exports.deletePatientById = deletePatientById;

@@ -16,7 +16,7 @@ const initUser = (sequelize) => {
             autoIncrement: false,
             primaryKey: true
         },
-        display_name: sequelize_1.DataTypes.STRING,
+        displayName: sequelize_1.DataTypes.STRING,
         email: sequelize_1.DataTypes.STRING,
         password: sequelize_1.DataTypes.STRING,
         role: sequelize_1.DataTypes.STRING,
@@ -27,13 +27,13 @@ const initUser = (sequelize) => {
     }, {
         sequelize // Instance of sequelize that reflects the connection
     });
-    User.hasMany(patientInfo_model_1.PatientInfo, {
-        foreignKey: 'user_id',
-        sourceKey: 'id',
-    });
-    patientInfo_model_1.PatientInfo.belongsTo(User, {
-        foreignKey: 'user_id',
-        targetKey: 'id',
-    });
+    /*     User.hasMany(PatientInfo, {
+            foreignKey: 'user_id',
+        });
+    
+        PatientInfo.belongsTo(User, {
+        }); */
+    User.hasMany(patientInfo_model_1.PatientInfo);
+    patientInfo_model_1.PatientInfo.belongsTo(User);
 };
 exports.initUser = initUser;

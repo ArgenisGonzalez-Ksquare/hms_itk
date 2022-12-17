@@ -1,16 +1,80 @@
 import { Router, Request, Response } from 'express';
 import { userInfo } from 'os';
 //import { createTodo, deleteTodoById, fetchTodoById, updateTodoById } from '../repository/Todo.repo'
-import { createPatientInfo, fetchPatientById, updatePatientById} from '../controllers/patientInfo.repo';
+import { createPatientInfo, fetchPatientById, updatePatientById, deletePatientById, listPatient, paginatedList} from '../controllers/patientInfo.repo';
 
 export const PatientInfo = Router();
 
-PatientInfo.post('/newPatient', async (req: Request, res: Response) => {
-    const FullName: string = req.body.FullName as string;
-    const UserId: number = req.body.UserId as number;
-    const Birthdate: Date = req.body.Birthdate as Date;
 
-    if (!FullName || !UserId || !Birthdate) {
+//pagination
+
+PatientInfo.get('/', async (req:Request, res:Response) => {
+
+
+    //SI NO ES PATIENT NO PUEDE VER
+    if(req.headers['role'] !== 'patient'){
+        return res.status(402).send({
+            error: "Not Authorized"
+        })
+    }
+
+
+    let limit = Number(req.query['size'])
+    let offset = 0 + Number(req.query['page']) - 1 * limit
+
+    console.log(limit, offset)
+    const list = await paginatedList(limit,offset);
+ 
+    res.status(200);
+    res.send(list); 
+})
+
+
+
+PatientInfo.get('/allpatients', async (req: Request, res: Response) => {
+
+    
+    //SI NO ES PATIENT NO PUEDE VER
+    if(req.headers['role'] !== 'patient'){
+        return res.status(402).send({
+            error: "Not Authorized"
+        })
+    }
+
+
+    let list = await listPatient(false);
+    
+
+    if (!list) {
+        res.status(400);
+        return res.send({
+            error: 'Empty List'
+        })
+    }
+
+    res.status(200);
+    res.send({
+        list
+    });
+
+})
+
+
+PatientInfo.post('/newPatient', async (req: Request, res: Response) => {
+    const FullName: string = req.body.full_name as string;
+    const UserId: number = req.body.user_id as number;
+    const Birthdate: Date = req.body.birthdate as Date;
+
+    
+    //SI NO ES PATIENT NO PUEDE VER
+    if(req.headers['role'] !== 'patient'){
+        return res.status(402).send({
+            error: "Not Authorized"
+        })
+    }
+
+
+    if (!FullName || !Birthdate) {
         res.status(400)
         return res.send({
             message: 'Some information is missing'
@@ -19,7 +83,7 @@ PatientInfo.post('/newPatient', async (req: Request, res: Response) => {
 
     // Si tengo mi description
     // Debo crear un nuevo TODO y guardarlo a la DB
-    const newPatientId = await createPatientInfo(FullName, UserId, Birthdate);
+    const newPatientId = await createPatientInfo(FullName, Birthdate);
 
     res.status(201);
     res.send({
@@ -31,6 +95,15 @@ PatientInfo.post('/newPatient', async (req: Request, res: Response) => {
 PatientInfo.get('/:patienInfoId', async (req: Request, res: Response) => {
 
     const PatientId = Number(req.params['patienInfoId']);
+
+    
+    //SI NO ES PATIENT NO PUEDE VER
+    if(req.headers['role'] !== 'patient'){
+        return res.status(402).send({
+            error: "Not Authorized"
+        })
+    }
+
 
     if (PatientId <= 0) {
         res.status(400);
@@ -59,6 +132,16 @@ PatientInfo.get('/:patienInfoId', async (req: Request, res: Response) => {
 PatientInfo.put('/:patientId', async (req: Request, res: Response) => {
     const patientId = Number(req.params['patientId']);
     const body = req.body;
+
+    
+    //SI NO ES PATIENT NO PUEDE VER
+    if(req.headers['role'] !== 'patient'){
+        return res.status(402).send({
+            error: "Not Authorized"
+        })
+    }
+
+
     if (patientId <= 0) {
         res.status(400);
         return res.send({
@@ -92,18 +175,28 @@ PatientInfo.put('/:patientId', async (req: Request, res: Response) => {
     return res.send(foundPatient);
 })
 
-/*
 
-TodoRouter.delete('/:todoId', async (req: Request, res: Response) => {
-    const todoId = Number(req.params['todoId']);
-    if (todoId <= 0) {
+
+PatientInfo.delete('/:patientId', async (req: Request, res: Response) => {
+    const patientId = Number(req.params['patientId']);
+
+    
+    //SI NO ES PATIENT NO PUEDE VER
+    if(req.headers['role'] !== 'patient'){
+        return res.status(402).send({
+            error: "Not Authorized"
+        })
+    }
+
+    
+    if (patientId <= 0) {
         res.status(400);
         return res.send({
             error: 'Invalid id'
         })
     }
 
-    const ar = await deleteTodoById(todoId);
+    const ar = await deletePatientById(patientId);
 
     if (!ar)  {
         return res.status(400).send({
@@ -112,4 +205,4 @@ TodoRouter.delete('/:todoId', async (req: Request, res: Response) => {
     }
 
     return res.sendStatus(200);
-}) */
+})
