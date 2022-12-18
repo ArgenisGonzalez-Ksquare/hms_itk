@@ -15,10 +15,10 @@ const initAppointmentInfo = (sequelize) => {
             autoIncrement: true,
             primaryKey: true
         },
-        PatientInfo_id: sequelize_1.DataTypes.INTEGER,
-        DoctorInfo_id: sequelize_1.DataTypes.INTEGER,
-        Date: sequelize_1.DataTypes.DATE,
-        Status: {
+        patientInfo_id: sequelize_1.DataTypes.INTEGER,
+        doctorInfo_id: sequelize_1.DataTypes.INTEGER,
+        date: sequelize_1.DataTypes.DATE,
+        is_active: {
             type: sequelize_1.DataTypes.BOOLEAN,
             defaultValue: false
         }

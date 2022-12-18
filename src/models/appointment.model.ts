@@ -3,10 +3,10 @@ import { Model, InferAttributes, InferCreationAttributes, CreationOptional, Data
 export class Appointment extends Model<InferAttributes<Appointment>, InferCreationAttributes<Appointment>> {
 
     declare id: CreationOptional<number>;
-    declare PatientInfo_id: number;
-    declare DoctorInfo_id: number;
-    declare Date: Date;
-    declare Status: CreationOptional<boolean>;
+    declare patientInfo_id: string;
+    declare doctorInfo_id: string;
+    declare date: Date;
+    declare is_active: CreationOptional<boolean>;
 
     getId(): number {
         return this.id;
@@ -23,10 +23,10 @@ export const initAppointmentInfo = (sequelize: Sequelize) => {
             primaryKey: true
 
         },
-        PatientInfo_id: DataTypes.INTEGER,
-        DoctorInfo_id: DataTypes.INTEGER,
-        Date: DataTypes.DATE,
-        Status: {
+        patientInfo_id: DataTypes.INTEGER,
+        doctorInfo_id: DataTypes.INTEGER,
+        date: DataTypes.DATE,
+        is_active: {
             type: DataTypes.BOOLEAN,
             defaultValue: false
         }

@@ -1,10 +1,10 @@
 import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes, Sequelize } from "sequelize";
 
-export class department extends Model<InferAttributes<department>, InferCreationAttributes<department>> {
+export class Department extends Model<InferAttributes<Department>, InferCreationAttributes<Department>> {
 
     declare id: CreationOptional<number>;
-    declare Department: string;
-    declare Status: CreationOptional<boolean>;
+    declare department: string;
+    declare is_active: CreationOptional<boolean>;
 
     getId(): number {
         return this.id;
@@ -13,7 +13,7 @@ export class department extends Model<InferAttributes<department>, InferCreation
 }
 
 export const initDepartment = (sequelize: Sequelize) => {
-    department.init({
+    Department.init({
     
         id: {
             type: DataTypes.INTEGER,
@@ -21,8 +21,8 @@ export const initDepartment = (sequelize: Sequelize) => {
             primaryKey: true
 
         },
-        Department: DataTypes.STRING,
-        Status: {
+        department: DataTypes.STRING,
+        is_active: {
             type: DataTypes.BOOLEAN,
             defaultValue: true
         }

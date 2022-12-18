@@ -15,10 +15,10 @@ const initDoctorInfo = (sequelize) => {
             autoIncrement: true,
             primaryKey: true
         },
-        FullName: sequelize_1.DataTypes.STRING,
-        UserId: sequelize_1.DataTypes.INTEGER,
-        Birthdate: sequelize_1.DataTypes.DATE,
-        Status: {
+        full_name: sequelize_1.DataTypes.STRING,
+        user_id: sequelize_1.DataTypes.STRING,
+        birthdate: sequelize_1.DataTypes.DATEONLY,
+        is_active: {
             type: sequelize_1.DataTypes.BOOLEAN,
             defaultValue: true
         }
