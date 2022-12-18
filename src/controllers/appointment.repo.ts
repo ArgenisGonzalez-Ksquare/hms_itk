@@ -85,6 +85,61 @@ export const fetchAppointmentByDoctorId = async (doctor_id: string) => {
 }
 
 
+export const fetchAppointmentByPatientId = async (patientInfo_id: string) => {
+    try {
+        const foundAppointment = await Appointment.findAll({
+            where: {
+                patientInfo_id: patientInfo_id
+            }
+        });
+
+        return foundAppointment;
+
+    } catch (error) {
+        console.error(error);
+
+        return null;
+    }
+}
+
+
+export const fetchAppointmentByDate = async (nDate: Date) => {
+    try {
+        const foundAppointment = await Appointment.findAll({
+            where: {
+                date: nDate
+            }
+        });
+
+        return foundAppointment;
+
+    } catch (error) {
+        console.error(error);
+
+        return null;
+    }
+}
+
+export const fetchAppointmentByIsDelete = async(is_active:boolean) => {
+    try {
+        const foundAppointment = await Appointment.findAll({
+            where: {
+                is_active: is_active
+            }
+        });
+
+        return foundAppointment;
+
+    } catch (error) {
+        console.error(error);
+
+        return null;
+    }
+}
+
+
+
+
 export const updateAppointmentById = async (id: number, AppointmentModel: InferAttributes<Appointment>) => {
 
     try {

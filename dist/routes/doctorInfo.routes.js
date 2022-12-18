@@ -48,6 +48,7 @@ exports.DoctorInfo.get('/allDoctors', (req, res) => __awaiter(void 0, void 0, vo
         list
     });
 }));
+//Create an endpoint where an admin can create a new doctor account (user).  
 exports.DoctorInfo.post('/newDoctor', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const FullName = req.body.full_name;
     const UserId = req.body.user_id;
@@ -97,6 +98,7 @@ exports.DoctorInfo.get('/:doctorInfoId', (req, res) => __awaiter(void 0, void 0,
     res.status(200);
     res.send(foundDoctor);
 }));
+//Create an endpoint that can modify the is_active property from the User model back to true. 
 exports.DoctorInfo.put('/:DoctorId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const DoctorId = Number(req.params['DoctorId']);
     const body = req.body;

@@ -59,7 +59,7 @@ DoctorInfo.get('/allDoctors', async (req: Request, res: Response) => {
 
 })
 
-
+//Create an endpoint where an admin can create a new doctor account (user).  
 DoctorInfo.post('/newDoctor', async (req: Request, res: Response) => {
     const FullName: string = req.body.full_name as string;
     const UserId: string = req.body.user_id as string;
@@ -129,6 +129,7 @@ DoctorInfo.get('/:doctorInfoId', async (req: Request, res: Response) => {
 
 })
 
+//Create an endpoint that can modify the is_active property from the User model back to true. 
 DoctorInfo.put('/:DoctorId', async (req: Request, res: Response) => {
     const DoctorId = Number(req.params['DoctorId']);
     const body = req.body;

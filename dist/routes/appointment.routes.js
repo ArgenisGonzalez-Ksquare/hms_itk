@@ -14,7 +14,8 @@ const express_1 = require("express");
 //import { createTodo, deleteTodoById, fetchTodoById, updateTodoById } from '../repository/Todo.repo'
 const appointment_repo_1 = require("../controllers/appointment.repo");
 exports.Appointment = (0, express_1.Router)();
-//pagination
+//Create pagination for this resource
+//[Appointments] Create pagination filters for the previous endpoint 
 exports.Appointment.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     //SI NO ES ApplistAppointment NO PUEDE VER
     if (req.headers['role'] !== 'patient') {
@@ -29,6 +30,8 @@ exports.Appointment.get('/', (req, res) => __awaiter(void 0, void 0, void 0, fun
     res.status(200);
     res.send(list);
 }));
+//Create a series of endpoints that need to LIST, Read, Create and Delete appointments 
+//Create an endpoint that would LIST all the appointments in the table 
 exports.Appointment.get('/allAppointment', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     //SI NO ES ApplistAppointment NO PUEDE VER
     if (req.headers['role'] !== 'admin') {
@@ -52,7 +55,7 @@ exports.Appointment.post('/newAppointment', (req, res) => __awaiter(void 0, void
     const patientInfo_id = req.body.patientInfo_id;
     const doctorInfo_id = req.body.doctorInfo_id;
     const date = req.body.date;
-    //SI NO ES ApplistAppointment NO PUEDE VER
+    //Only a user with the role of patient can access these endpoints. 
     if (req.headers['role'] !== 'patient') {
         return res.status(400).send({
             error: "Not Authorized"
@@ -74,7 +77,7 @@ exports.Appointment.post('/newAppointment', (req, res) => __awaiter(void 0, void
 }));
 exports.Appointment.get('/:appointmentId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const appointmentId = Number(req.params['appointmentId']);
-    //SI NO ES ApplistAppointment NO PUEDE VER
+    //Only a user with the role of patient can access these endpoints. 
     if (req.headers['role'] !== 'patient') {
         return res.status(402).send({
             error: "Not Authorized"
@@ -90,16 +93,17 @@ exports.Appointment.get('/:appointmentId', (req, res) => __awaiter(void 0, void 
     if (!foundAppointment) {
         res.status(400);
         return res.send({
-            error: 'Todo not found.'
+            error: 'Appointment not found.'
         });
     }
     // TodoId es mayor a 0 y Todo con el TodoId existe en la DB
     res.status(200);
     res.send(foundAppointment);
 }));
+//Create an endpoint that reads from the same Model created in the previous model but only returns the appointments assigned to this doctor 
 exports.Appointment.get('/doctorAppointments/:doctorId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const doctorId = String(req.params['doctorId']);
-    //SI NO ES ApplistAppointment NO PUEDE VER
+    //Only a user with the role of doctor can access these endpoints. 
     if (req.headers['role'] !== 'doctor') {
         return res.status(401).send({
             error: "Not Authorized"
@@ -115,6 +119,58 @@ exports.Appointment.get('/doctorAppointments/:doctorId', (req, res) => __awaiter
     if (!foundAppointment) {
         res.status(400);
         return res.send({
+            error: 'Appointment not found.'
+        });
+    }
+    // TodoId es mayor a 0 y Todo con el TodoId existe en la DB
+    res.status(200);
+    res.send(foundAppointment);
+}));
+exports.Appointment.get('/AdminAppointmentsDoctors/:doctorId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const doctorId = String(req.params['doctorId']);
+    //Only a user with the role of doctor can access these endpoints. 
+    if (req.headers['role'] !== 'admin') {
+        return res.status(401).send({
+            error: "Not Authorized"
+        });
+    }
+    if (Number(doctorId) <= 0) {
+        res.status(400);
+        return res.send({
+            error: 'Invalid id'
+        });
+    }
+    const foundAppointment = yield (0, appointment_repo_1.fetchAppointmentByDoctorId)(doctorId);
+    if (!foundAppointment) {
+        res.status(400);
+        return res.send({
+            error: 'Appointment not found.'
+        });
+    }
+    // TodoId es mayor a 0 y Todo con el TodoId existe en la DB
+    res.status(200);
+    res.send(foundAppointment);
+}));
+//Filter by Patient 
+exports.Appointment.get('/PatientAppointments/:patientId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const patientId = String(req.params['patientId']);
+    let recieveRole = req.headers['role'];
+    //Only a user with the role of doctor can access these endpoints. 
+    if (recieveRole !== 'doctor') {
+        return res.status(401).send({
+            error: "Not Authorized"
+        });
+    }
+    if (Number(patientId) <= 0) {
+        res.status(400);
+        return res.send({
+            error: 'Invalid id'
+        });
+    }
+    const foundAppointment = yield (0, appointment_repo_1.fetchAppointmentByPatientId)(patientId);
+    if (!foundAppointment) {
+        res.status(400);
+        return res.send({
             error: 'Todo not found.'
         });
     }
@@ -122,11 +178,83 @@ exports.Appointment.get('/doctorAppointments/:doctorId', (req, res) => __awaiter
     res.status(200);
     res.send(foundAppointment);
 }));
+//[Appointments] Create a filter where you can pass a patientId and only see the appointments of that user 
+exports.Appointment.get('/AdminAppointmentsPatients/:patientId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const patientId = String(req.params['patientId']);
+    let recieveRole = req.headers['role'];
+    //Only a user with the role of doctor can access these endpoints. 
+    if (recieveRole !== 'admin') {
+        return res.status(401).send({
+            error: "Not Authorized"
+        });
+    }
+    if (Number(patientId) <= 0) {
+        res.status(400);
+        return res.send({
+            error: 'Invalid id'
+        });
+    }
+    const foundAppointment = yield (0, appointment_repo_1.fetchAppointmentByPatientId)(patientId);
+    if (!foundAppointment) {
+        res.status(400);
+        return res.send({
+            error: 'Appointment not found.'
+        });
+    }
+    // TodoId es mayor a 0 y Todo con el TodoId existe en la DB
+    res.status(200);
+    res.send(foundAppointment);
+}));
+//Filter by date 
+exports.Appointment.get('/DateAppointment/putDate', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const date = req.body.date;
+    //Only a user with the role of doctor can access these endpoints. 
+    if (req.headers['role'] !== 'doctor') {
+        return res.status(401).send({
+            error: "Not Authorized"
+        });
+    }
+    if (!date) {
+        res.status(400);
+        return res.send({
+            error: 'Invalid format for date'
+        });
+    }
+    const foundAppointment = yield (0, appointment_repo_1.fetchAppointmentByDate)(date);
+    if (!foundAppointment) {
+        res.status(400);
+        return res.send({
+            error: 'Appointment not found.'
+        });
+    }
+    // TodoId es mayor a 0 y Todo con el TodoId existe en la DB
+    res.status(200);
+    res.send(foundAppointment);
+}));
+exports.Appointment.get('/admin/DeletesAppointment/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    //Only a user with the role of admin can access these endpoints. 
+    if (req.headers['role'] !== 'admin') {
+        return res.status(401).send({
+            error: "Not Authorized"
+        });
+    }
+    const foundAppointment = yield (0, appointment_repo_1.fetchAppointmentByIsDelete)(false);
+    if (!foundAppointment) {
+        res.status(400);
+        return res.send({
+            error: 'Appointments not found.'
+        });
+    }
+    // TodoId es mayor a 0 y Todo con el TodoId existe en la DB
+    res.status(200);
+    res.send(foundAppointment);
+}));
+//Create an endpoint that allows a doctor to modify the date or time of the appointment and only that. 
 exports.Appointment.put('/:appointmentId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const appointmentId = Number(req.params['appointmentId']);
     const body = req.body;
-    //SI NO ES ApplistAppointment NO PUEDE VER
-    if (req.headers['role'] !== 'ApplistAppointment') {
+    //SOnly a user with the role of doctor can access these endpoints. 
+    if (req.headers['role'] !== 'doctor') {
         return res.status(402).send({
             error: "Not Authorized"
         });
@@ -156,10 +284,11 @@ exports.Appointment.put('/:appointmentId', (req, res) => __awaiter(void 0, void 
     res.status(200);
     return res.send(foundAppointment);
 }));
+//The delete needs to be soft (do not erase the record) 
 exports.Appointment.delete('/:appointmentId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const appointmentId = Number(req.params['appointmentId']);
-    //SI NO ES ApplistAppointment NO PUEDE VER
-    if (req.headers['role'] !== 'ApplistAppointment') {
+    //Only a user with the role of patient can access these endpoints. 
+    if (req.headers['role'] !== 'patient') {
         return res.status(402).send({
             error: "Not Authorized"
         });
