@@ -1,13 +1,14 @@
 import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes, Sequelize } from "sequelize";
-import {User} from './user.model'
+import { Appointment } from "./appointment.model";
+import { User } from "./user.model"
 
 
 export class PatientInfo extends Model<InferAttributes<PatientInfo>, InferCreationAttributes<PatientInfo>> {
     declare id: CreationOptional<number>;
     declare full_name: string;
-    declare user_id: CreationOptional<number>;
+    /* declare user_id: CreationOptional<number>; */
     declare birthdate: Date;
-    declare status: CreationOptional<boolean>;
+    declare is_active: CreationOptional<boolean>;
 
     getId(): number {
         return this.id;
@@ -23,9 +24,9 @@ export const initPatienInfo = (sequelize: Sequelize) => {
 
         },
         full_name: DataTypes.STRING,
-        user_id: DataTypes.INTEGER,
+        /* user_id: DataTypes.INTEGER, */
         birthdate: DataTypes.DATEONLY,
-        status: {
+        is_active: {
             type: DataTypes.BOOLEAN,
             defaultValue: true
         }
@@ -33,5 +34,7 @@ export const initPatienInfo = (sequelize: Sequelize) => {
 }, {
     sequelize // Instance of sequelize that reflects the connection
 })
+
 }
+
 

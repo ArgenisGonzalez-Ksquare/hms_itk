@@ -1,5 +1,5 @@
 import { InferAttributes, where } from "sequelize";
-import {  PatientInfo } from "../models/patientInfo.model";
+import {  Department } from "../models/department.model";
 
 // Create operation
 
@@ -7,8 +7,8 @@ import {  PatientInfo } from "../models/patientInfo.model";
 export const paginatedList = async(pLimit:number, pOffset:number) =>{
 
     try {
-        const res = await PatientInfo.findAll({
-            attributes: ['id', 'full_name', 'birthdate'],
+        const res = await Department.findAll({
+            attributes: ['id', 'department'],
             limit: pLimit,
             offset :pOffset,
             where: {
@@ -25,9 +25,9 @@ export const paginatedList = async(pLimit:number, pOffset:number) =>{
 }
 
 
-export const listPatient =async (is_active: boolean) => {
-    const res = await PatientInfo.findAll({
-        attributes: ['id', 'full_name', 'birthdate'], // SELECT id From "Todos" WHERE is_completed = true;
+export const listDepartments =async (is_active: boolean) => {
+    const res = await Department.findAll({
+        attributes: ['id', 'department'], // SELECT id From "Todos" WHERE is_completed = true;
         where: {
             is_active: true
         }
@@ -35,15 +35,14 @@ export const listPatient =async (is_active: boolean) => {
     return res;
 }
 
-export const createPatientInfo = async (full_name:string, birthdate: Date) => {
+export const createDepartment = async (department:string) => {
     try {
-        const patient = await PatientInfo.create({
-            full_name,
-            birthdate,
+        const departmentResult = await Department.create({
+            department
         })
 
 
-        return patient;
+        return departmentResult;
     } catch (error) {
         console.error(error);
         return null
@@ -52,11 +51,11 @@ export const createPatientInfo = async (full_name:string, birthdate: Date) => {
 }
 
 
-export const fetchPatientById = async (id: number) => {
+export const fetchDepartmentById = async (id: number) => {
     try {
-        const foundPatient = await PatientInfo.findByPk(id);
+        const foundDepartment = await Department.findByPk(id) ;
 
-        return foundPatient;
+        return foundDepartment;
 
     } catch (error) {
         console.error(error);
@@ -66,13 +65,12 @@ export const fetchPatientById = async (id: number) => {
 }
 
 
-export const updatePatientById = async (id: number, patientModel: InferAttributes<PatientInfo>) => {
+export const updateDepartmentById = async (id: number, departmentModel: InferAttributes<Department>) => {
 
     try {
-        const foo = await PatientInfo.update({
-            full_name: patientModel.full_name,
-            birthdate: patientModel.birthdate,
-            is_active: patientModel.is_active
+        const foo = await Department.update({
+            department: departmentModel.department,
+            is_active: departmentModel.is_active
         }, {
             where: {
                 id: id
@@ -89,9 +87,9 @@ export const updatePatientById = async (id: number, patientModel: InferAttribute
 }
 
 
-export const deletePatientById = async (id: number) => {
+export const deleteDepartmentById = async (id: number) => {
     try {
-        const foo = await PatientInfo.update({
+        const foo = await Department.update({
             is_active: false
         }, {
             where: {

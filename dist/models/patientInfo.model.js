@@ -16,9 +16,9 @@ const initPatienInfo = (sequelize) => {
             primaryKey: true
         },
         full_name: sequelize_1.DataTypes.STRING,
-        user_id: sequelize_1.DataTypes.INTEGER,
+        /* user_id: DataTypes.INTEGER, */
         birthdate: sequelize_1.DataTypes.DATEONLY,
-        status: {
+        is_active: {
             type: sequelize_1.DataTypes.BOOLEAN,
             defaultValue: true
         }

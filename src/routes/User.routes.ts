@@ -1,33 +1,40 @@
 import { Router, Request, Response } from "express";
 import { createUser, disableUser, getAllUsers, readUser, updateUser } from "../firebase";
+import { createUserOnPostgres } from '../controllers/user.repo'
 import { isAuthenticated } from "../middlewares/isAuthentificated";
 import { isAuthorized } from "../middlewares/isAuthorized";
 import {Role} from '../firebase/index'
 
 export const UserRouter = Router();
+export const User = Router();
 
 UserRouter.post('/newUser',async (req:Request, res: Response) => {
     // Info desde el body
     // Checar si falta info
     // Checar que el rol sea adecuado
 
-    const { displayName, email, password }  = req.body
+    const { uid, displayName, email, password, role}  = req.body
 
     if (!displayName || !email || !password) {
         return res.status(400).send({error: 'Missing fields'})
     }
 
-
     try {
         const userId = await createUser(displayName, email, password, 'patient');
-        res.status(201).send({
-            userId
+        console.log(userId)
+        const user = await createUserOnPostgres(userId, displayName, email, password, 'patient')
+
+
+        return res.status(201).send({
+            user
         })
     } catch (error) {
         res.status(500).send({error: 'something went wrong'})
     }
 
 })
+
+
 
 
 

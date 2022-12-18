@@ -3,14 +3,14 @@ import {PatientInfo} from './patientInfo.model'
 
 export class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
 
-    declare id: CreationOptional<number>;
-    declare display_name: string;
+    declare id: CreationOptional<string>;
+    declare displayName: string;
     declare email: string;
     declare password: string;
     declare role: CreationOptional<string>;
     declare status: CreationOptional<boolean>;
 
-    getId(): number {
+    getId(): string {
         return this.id;
     }
 
@@ -24,7 +24,7 @@ export const initUser = (sequelize: Sequelize) => {
             primaryKey: true
 
         },
-        display_name: DataTypes.STRING,
+        displayName: DataTypes.STRING,
         email: DataTypes.STRING,
         password: DataTypes.STRING,
         role: DataTypes.STRING,
@@ -36,15 +36,10 @@ export const initUser = (sequelize: Sequelize) => {
 }, {
     sequelize // Instance of sequelize that reflects the connection
 })
-    User.hasMany(PatientInfo, {
-        foreignKey: 'user_id',
-        sourceKey: 'id',
-    });
 
-    PatientInfo.belongsTo(User, {
-        foreignKey: 'user_id',
-        targetKey: 'id',
-    });
+
+    User.hasMany(PatientInfo);
+    PatientInfo.belongsTo(User);
 }
 
 

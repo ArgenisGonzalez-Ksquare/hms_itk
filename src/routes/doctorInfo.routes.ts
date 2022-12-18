@@ -1,18 +1,18 @@
 import { Router, Request, Response } from 'express';
 import { userInfo } from 'os';
 //import { createTodo, deleteTodoById, fetchTodoById, updateTodoById } from '../repository/Todo.repo'
-import { createPatientInfo, fetchPatientById, updatePatientById, deletePatientById, listPatient, paginatedList} from '../controllers/patientInfo.repo';
+import { createDoctorInfo, fetchDoctorById, updateDoctorById, deleteDoctorById, listDoctor, paginatedList} from '../controllers/doctorInfo.repo';
 
-export const PatientInfo = Router();
+export const DoctorInfo = Router();
 
 
 //pagination
 
-PatientInfo.get('/', async (req:Request, res:Response) => {
+DoctorInfo.get('/', async (req:Request, res:Response) => {
 
 
-    //SI NO ES PATIENT NO PUEDE VER
-    if(req.headers['role'] !== 'patient'){
+    //SI NO ES Doctor NO PUEDE VER
+    if(req.headers['role'] !== 'admin'){
         return res.status(402).send({
             error: "Not Authorized"
         })
@@ -31,18 +31,18 @@ PatientInfo.get('/', async (req:Request, res:Response) => {
 
 
 
-PatientInfo.get('/allpatients', async (req: Request, res: Response) => {
+DoctorInfo.get('/allDoctors', async (req: Request, res: Response) => {
 
     
-    //SI NO ES PATIENT NO PUEDE VER
-    if(req.headers['role'] !== 'patient'){
+    //SI NO ES Doctor NO PUEDE VER
+    if(req.headers['role'] !== 'admin'){
         return res.status(402).send({
             error: "Not Authorized"
         })
     }
 
 
-    let list = await listPatient(false);
+    let list = await listDoctor(false);
     
 
     if (!list) {
@@ -60,21 +60,21 @@ PatientInfo.get('/allpatients', async (req: Request, res: Response) => {
 })
 
 
-PatientInfo.post('/newPatient', async (req: Request, res: Response) => {
+DoctorInfo.post('/newDoctor', async (req: Request, res: Response) => {
     const FullName: string = req.body.full_name as string;
-    const UserId: number = req.body.user_id as number;
+    const UserId: string = req.body.user_id as string;
     const Birthdate: Date = req.body.birthdate as Date;
 
     
-    //SI NO ES PATIENT NO PUEDE VER
-    if(req.headers['role'] !== 'patient'){
+    //SI NO ES Doctor NO PUEDE VER
+    if(req.headers['role'] !== 'admin'){
         return res.status(402).send({
             error: "Not Authorized"
         })
     }
 
 
-    if (!FullName || !Birthdate) {
+    if (!FullName || !Birthdate || !UserId) {
         res.status(400)
         return res.send({
             message: 'Some information is missing'
@@ -83,38 +83,38 @@ PatientInfo.post('/newPatient', async (req: Request, res: Response) => {
 
     // Si tengo mi description
     // Debo crear un nuevo TODO y guardarlo a la DB
-    const newPatientId = await createPatientInfo(FullName, Birthdate);
+    const newDoctorId = await createDoctorInfo(FullName, UserId, Birthdate);
 
     res.status(201);
     res.send({
-        newPatientId
+        newDoctorId
     })
 })
 
 
-PatientInfo.get('/:patienInfoId', async (req: Request, res: Response) => {
+DoctorInfo.get('/:doctorInfoId', async (req: Request, res: Response) => {
 
-    const PatientId = Number(req.params['patienInfoId']);
+    const DoctorId = Number(req.params['doctorInfoId']);
 
     
-    //SI NO ES PATIENT NO PUEDE VER
-    if(req.headers['role'] !== 'patient'){
+    //SI NO ES Doctor NO PUEDE VER
+    if(req.headers['role'] !== 'admin'){
         return res.status(402).send({
             error: "Not Authorized"
         })
     }
 
 
-    if (PatientId <= 0) {
+    if (DoctorId <= 0) {
         res.status(400);
         return res.send({
             error: 'Invalid id'
         })
     }
 
-    const foundPatient = await fetchPatientById(PatientId);
+    const foundDoctor = await fetchDoctorById(DoctorId);
 
-    if (!foundPatient) {
+    if (!foundDoctor) {
 
         res.status(400)
         return res.send({
@@ -125,31 +125,31 @@ PatientInfo.get('/:patienInfoId', async (req: Request, res: Response) => {
 
     // TodoId es mayor a 0 y Todo con el TodoId existe en la DB
     res.status(200);
-    res.send(foundPatient);
+    res.send(foundDoctor);
 
 })
 
-PatientInfo.put('/:patientId', async (req: Request, res: Response) => {
-    const patientId = Number(req.params['patientId']);
+DoctorInfo.put('/:DoctorId', async (req: Request, res: Response) => {
+    const DoctorId = Number(req.params['DoctorId']);
     const body = req.body;
 
     
-    //SI NO ES PATIENT NO PUEDE VER
-    if(req.headers['role'] !== 'patient'){
+    //SI NO ES Doctor NO PUEDE VER
+    if(req.headers['role'] !== 'admin'){
         return res.status(402).send({
             error: "Not Authorized"
         })
     }
 
 
-    if (patientId <= 0) {
+    if (DoctorId <= 0) {
         res.status(400);
         return res.send({
             error: 'Invalid id'
         })
     }
 
-    const affectedRows = await updatePatientById(patientId, body);
+    const affectedRows = await updateDoctorById(DoctorId, body);
     console.log("----------------")
     console.log(affectedRows);
     if (!affectedRows) {
@@ -169,34 +169,34 @@ PatientInfo.put('/:patientId', async (req: Request, res: Response) => {
         })
     }
 
-    const foundPatient = await fetchPatientById(patientId);
+    const foundDoctor = await fetchDoctorById(DoctorId);
 
     res.status(200)
-    return res.send(foundPatient);
+    return res.send(foundDoctor);
 })
 
 
 
-PatientInfo.delete('/:patientId', async (req: Request, res: Response) => {
-    const patientId = Number(req.params['patientId']);
+DoctorInfo.delete('/:DoctorId', async (req: Request, res: Response) => {
+    const DoctorId = Number(req.params['DoctorId']);
 
     
-    //SI NO ES PATIENT NO PUEDE VER
-    if(req.headers['role'] !== 'patient'){
+    //SI NO ES Doctor NO PUEDE VER
+    if(req.headers['role'] !== 'admin'){
         return res.status(402).send({
             error: "Not Authorized"
         })
     }
 
     
-    if (patientId <= 0) {
+    if (DoctorId <= 0) {
         res.status(400);
         return res.send({
             error: 'Invalid id'
         })
     }
 
-    const ar = await deletePatientById(patientId);
+    const ar = await deleteDoctorById(DoctorId);
 
     if (!ar)  {
         return res.status(400).send({

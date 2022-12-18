@@ -9,13 +9,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deletePatientById = exports.updatePatientById = exports.fetchPatientById = exports.createPatientInfo = exports.listPatient = exports.paginatedList = void 0;
-const patientInfo_model_1 = require("../models/patientInfo.model");
+exports.deleteDepartmentById = exports.updateDepartmentById = exports.fetchDepartmentById = exports.createDepartment = exports.listDepartments = exports.paginatedList = void 0;
+const department_model_1 = require("../models/department.model");
 // Create operation
 const paginatedList = (pLimit, pOffset) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const res = yield patientInfo_model_1.PatientInfo.findAll({
-            attributes: ['id', 'full_name', 'birthdate'],
+        const res = yield department_model_1.Department.findAll({
+            attributes: ['id', 'department'],
             limit: pLimit,
             offset: pOffset,
             where: {
@@ -30,47 +30,45 @@ const paginatedList = (pLimit, pOffset) => __awaiter(void 0, void 0, void 0, fun
     }
 });
 exports.paginatedList = paginatedList;
-const listPatient = (is_active) => __awaiter(void 0, void 0, void 0, function* () {
-    const res = yield patientInfo_model_1.PatientInfo.findAll({
-        attributes: ['id', 'full_name', 'birthdate'],
+const listDepartments = (is_active) => __awaiter(void 0, void 0, void 0, function* () {
+    const res = yield department_model_1.Department.findAll({
+        attributes: ['id', 'department'],
         where: {
             is_active: true
         }
     });
     return res;
 });
-exports.listPatient = listPatient;
-const createPatientInfo = (full_name, birthdate) => __awaiter(void 0, void 0, void 0, function* () {
+exports.listDepartments = listDepartments;
+const createDepartment = (department) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const patient = yield patientInfo_model_1.PatientInfo.create({
-            full_name,
-            birthdate,
+        const departmentResult = yield department_model_1.Department.create({
+            department
         });
-        return patient;
+        return departmentResult;
     }
     catch (error) {
         console.error(error);
         return null;
     }
 });
-exports.createPatientInfo = createPatientInfo;
-const fetchPatientById = (id) => __awaiter(void 0, void 0, void 0, function* () {
+exports.createDepartment = createDepartment;
+const fetchDepartmentById = (id) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const foundPatient = yield patientInfo_model_1.PatientInfo.findByPk(id);
-        return foundPatient;
+        const foundDepartment = yield department_model_1.Department.findByPk(id);
+        return foundDepartment;
     }
     catch (error) {
         console.error(error);
         return null;
     }
 });
-exports.fetchPatientById = fetchPatientById;
-const updatePatientById = (id, patientModel) => __awaiter(void 0, void 0, void 0, function* () {
+exports.fetchDepartmentById = fetchDepartmentById;
+const updateDepartmentById = (id, departmentModel) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const foo = yield patientInfo_model_1.PatientInfo.update({
-            full_name: patientModel.full_name,
-            birthdate: patientModel.birthdate,
-            is_active: patientModel.is_active
+        const foo = yield department_model_1.Department.update({
+            department: departmentModel.department,
+            is_active: departmentModel.is_active
         }, {
             where: {
                 id: id
@@ -83,10 +81,10 @@ const updatePatientById = (id, patientModel) => __awaiter(void 0, void 0, void 0
         return null;
     }
 });
-exports.updatePatientById = updatePatientById;
-const deletePatientById = (id) => __awaiter(void 0, void 0, void 0, function* () {
+exports.updateDepartmentById = updateDepartmentById;
+const deleteDepartmentById = (id) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const foo = yield patientInfo_model_1.PatientInfo.update({
+        const foo = yield department_model_1.Department.update({
             is_active: false
         }, {
             where: {
@@ -100,4 +98,4 @@ const deletePatientById = (id) => __awaiter(void 0, void 0, void 0, function* ()
         return null;
     }
 });
-exports.deletePatientById = deletePatientById;
+exports.deleteDepartmentById = deleteDepartmentById;
