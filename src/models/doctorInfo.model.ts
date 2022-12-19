@@ -35,6 +35,7 @@ export const initDoctorInfo = (sequelize: Sequelize) => {
 }, {
     sequelize // Instance of sequelize that reflects the connection
 })
-
+/*     DoctorInfo.hasMany(Appointment);
+    Appointment.belongsTo(DoctorInfo); */
 }
 

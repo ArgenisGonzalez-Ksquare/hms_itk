@@ -8,10 +8,6 @@ export class Appointment extends Model<InferAttributes<Appointment>, InferCreati
     declare date: Date;
     declare is_active: CreationOptional<boolean>;
 
-    getId(): number {
-        return this.id;
-    }
-
 }
 
 export const initAppointmentInfo = (sequelize: Sequelize) => {
@@ -23,8 +19,8 @@ export const initAppointmentInfo = (sequelize: Sequelize) => {
             primaryKey: true
 
         },
-        patientInfo_id: DataTypes.INTEGER,
-        doctorInfo_id: DataTypes.INTEGER,
+        patientInfo_id: DataTypes.STRING,
+        doctorInfo_id: DataTypes.STRING,
         date: DataTypes.DATE,
         is_active: {
             type: DataTypes.BOOLEAN,

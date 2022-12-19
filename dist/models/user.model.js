@@ -27,7 +27,9 @@ const initUser = (sequelize) => {
     }, {
         sequelize // Instance of sequelize that reflects the connection
     });
-    User.hasMany(patientInfo_model_1.PatientInfo);
-    patientInfo_model_1.PatientInfo.belongsTo(User);
+    User.hasOne(patientInfo_model_1.PatientInfo);
+    patientInfo_model_1.PatientInfo.belongsTo(User, {
+        foreignKey: "user_id"
+    });
 };
 exports.initUser = initUser;

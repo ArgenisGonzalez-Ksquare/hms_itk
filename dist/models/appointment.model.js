@@ -3,9 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.initAppointmentInfo = exports.Appointment = void 0;
 const sequelize_1 = require("sequelize");
 class Appointment extends sequelize_1.Model {
-    getId() {
-        return this.id;
-    }
 }
 exports.Appointment = Appointment;
 const initAppointmentInfo = (sequelize) => {
@@ -15,8 +12,8 @@ const initAppointmentInfo = (sequelize) => {
             autoIncrement: true,
             primaryKey: true
         },
-        patientInfo_id: sequelize_1.DataTypes.INTEGER,
-        doctorInfo_id: sequelize_1.DataTypes.INTEGER,
+        patientInfo_id: sequelize_1.DataTypes.STRING,
+        doctorInfo_id: sequelize_1.DataTypes.STRING,
         date: sequelize_1.DataTypes.DATE,
         is_active: {
             type: sequelize_1.DataTypes.BOOLEAN,

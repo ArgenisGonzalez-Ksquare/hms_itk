@@ -42,7 +42,7 @@ const mapToUser = (user) => {
         email: user.email,
         userName: user.displayName,
         role,
-        isDisableL: user.disabled
+        isDisable: user.disabled
     };
 };
 const createUser = (displayName, email, password, role) => __awaiter(void 0, void 0, void 0, function* () {
@@ -52,7 +52,7 @@ const createUser = (displayName, email, password, role) => __awaiter(void 0, voi
         password
     });
     yield admin.auth().setCustomUserClaims(uid, { role });
-    return uid;
+    return [uid, role];
 });
 exports.createUser = createUser;
 const readUser = (uid) => __awaiter(void 0, void 0, void 0, function* () {
@@ -77,5 +77,6 @@ const disableUser = (uid, disabled) => __awaiter(void 0, void 0, void 0, functio
     const user = yield admin.auth().updateUser(uid, {
         disabled
     });
+    return 'status changed';
 });
 exports.disableUser = disableUser;

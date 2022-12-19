@@ -35,37 +35,29 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.isAuthenticated = void 0;
 const admin = __importStar(require("firebase-admin"));
 const isAuthenticated = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    //No authorization Header
+    // No authorization header
     const { authorization } = req.headers;
     if (!authorization) {
-        return res.status(401).send({
-            error: 'No Auth'
-        });
+        return res.status(401).send({ error: 'No auth' });
     }
-    //No correct Schema (bearer)
-    if (!authorization.startsWith('Bearer')) {
-        return res.status(401).send({
-            error: 'No Auth'
-        });
+    // No correct scheme (Bearer)
+    if (!authorization.startsWith("Bearer")) {
+        return res.status(401).send({ error: 'No auth' });
     }
-    //Check if the token is valid
-    const splittedToken = authorization.split('Bearer');
+    // Check if the token is valid
+    const splittedToken = authorization.split('Bearer ');
     if (splittedToken.length !== 2) {
-        return res.status(401).send({
-            error: 'No Auth'
-        });
+        return res.status(401).send({ error: 'No auth' });
     }
     const token = splittedToken[1];
     try {
         const decodedToken = yield admin.auth().verifyIdToken(token);
         res.locals = Object.assign(Object.assign({}, res.locals), { email: decodedToken.email, uid: decodedToken.uid, role: decodedToken.role });
-        return next(); //si cumple la funcion entonces se ejecuta el next
+        return next();
     }
     catch (error) {
         console.error(error);
-        res.status(401).send({
-            error: 'No Auth'
-        });
+        return res.status(401).send({ error: 'No auth' });
     }
 });
 exports.isAuthenticated = isAuthenticated;

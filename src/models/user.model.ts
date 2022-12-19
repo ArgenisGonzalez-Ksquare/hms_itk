@@ -38,8 +38,10 @@ export const initUser = (sequelize: Sequelize) => {
 })
 
 
-    User.hasMany(PatientInfo);
-    PatientInfo.belongsTo(User);
+    User.hasOne(PatientInfo);
+    PatientInfo.belongsTo(User, {
+        foreignKey: "user_id"
+    });
 }
 
 
