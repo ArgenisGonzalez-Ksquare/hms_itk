@@ -13,6 +13,8 @@ exports.DoctorInfo = void 0;
 const express_1 = require("express");
 //import { createTodo, deleteTodoById, fetchTodoById, updateTodoById } from '../repository/Todo.repo'
 const doctorInfo_repo_1 = require("../controllers/doctorInfo.repo");
+const isAuthentificated_1 = require("../middlewares/isAuthentificated");
+const isAuthorized_1 = require("../middlewares/isAuthorized");
 exports.DoctorInfo = (0, express_1.Router)();
 //pagination
 exports.DoctorInfo.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -49,16 +51,11 @@ exports.DoctorInfo.get('/allDoctors', (req, res) => __awaiter(void 0, void 0, vo
     });
 }));
 //Create an endpoint where an admin can create a new doctor account (user).  
-exports.DoctorInfo.post('/newDoctor', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.DoctorInfo.post('/newDoctor', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['doctor'], allowSameUser: true }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const FullName = req.body.full_name;
-    const UserId = req.body.user_id;
+    const UserId = res.locals.uid;
     const Birthdate = req.body.birthdate;
-    //SI NO ES Doctor NO PUEDE VER
-    if (req.headers['role'] !== 'admin') {
-        return res.status(402).send({
-            error: "Not Authorized"
-        });
-    }
+    console.log(res.locals);
     if (!FullName || !Birthdate || !UserId) {
         res.status(400);
         return res.send({

@@ -28,6 +28,7 @@ export const initDepartment = (sequelize: Sequelize) => {
         }
     
 }, {
+    tableName: "deparment",
     sequelize // Instance of sequelize that reflects the connection
 })
 }

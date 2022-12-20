@@ -1,4 +1,4 @@
-import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes, Sequelize } from "sequelize";
+/* import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes, Sequelize } from "sequelize";
 import {PatientInfo} from './patientInfo.model'
 
 export class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
@@ -45,3 +45,4 @@ export const initUser = (sequelize: Sequelize) => {
 }
 
 
+ */

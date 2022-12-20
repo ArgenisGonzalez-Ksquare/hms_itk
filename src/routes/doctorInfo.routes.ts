@@ -2,6 +2,9 @@ import { Router, Request, Response } from 'express';
 import { userInfo } from 'os';
 //import { createTodo, deleteTodoById, fetchTodoById, updateTodoById } from '../repository/Todo.repo'
 import { createDoctorInfo, fetchDoctorById, updateDoctorById, deleteDoctorById, listDoctor, paginatedList} from '../controllers/doctorInfo.repo';
+import { isAuthenticated } from "../middlewares/isAuthentificated";
+import { isAuthorized } from "../middlewares/isAuthorized";
+import * as admin from 'firebase-admin';
 
 export const DoctorInfo = Router();
 
@@ -60,19 +63,12 @@ DoctorInfo.get('/allDoctors', async (req: Request, res: Response) => {
 })
 
 //Create an endpoint where an admin can create a new doctor account (user).  
-DoctorInfo.post('/newDoctor', async (req: Request, res: Response) => {
+DoctorInfo.post('/newDoctor', isAuthenticated, isAuthorized({roles: ['doctor'], allowSameUser:true}), async (req: Request, res: Response) => {
     const FullName: string = req.body.full_name as string;
-    const UserId: string = req.body.user_id as string;
+    const UserId: string = res.locals.uid;
     const Birthdate: Date = req.body.birthdate as Date;
 
-    
-    //SI NO ES Doctor NO PUEDE VER
-    if(req.headers['role'] !== 'admin'){
-        return res.status(402).send({
-            error: "Not Authorized"
-        })
-    }
-
+    console.log(res.locals)
 
     if (!FullName || !Birthdate || !UserId) {
         res.status(400)

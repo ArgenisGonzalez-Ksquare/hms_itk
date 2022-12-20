@@ -35,10 +35,11 @@ export const listPatient =async (is_active: boolean) => {
     return res;
 }
 
-export const createPatientInfo = async (full_name:string, birthdate: Date) => {
+export const createPatientInfo = async (full_name:string, user_id: string, birthdate: Date) => {
     try {
         const patient = await PatientInfo.create({
             full_name,
+            user_id,
             birthdate,
         })
 

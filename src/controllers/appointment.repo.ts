@@ -1,10 +1,11 @@
-import { InferAttributes, where } from "sequelize";
+import { InferAttributes, UUID, where } from "sequelize";
 import {  Appointment  } from "../models/appointment.model";
+import { DoctorInfo } from "../routes/doctorInfo.routes";
 
 // Appointment MODULE
 
 
-export const paginatedList = async(pLimit:number, pOffset:number) =>{
+export const paginatedList = async(uid: string, pLimit:number, pOffset:number) =>{
 
     try {
         const res = await Appointment.findAll({
@@ -12,7 +13,9 @@ export const paginatedList = async(pLimit:number, pOffset:number) =>{
             limit: pLimit,
             offset :pOffset,
             where: {
+                patientInfo_id: uid,
                 is_active: false
+                
             }
         })
         return res
@@ -30,11 +33,23 @@ export const listAppointment =async (is_active: boolean) => {
     const res = await Appointment.findAll({
         attributes: ['id', 'patientInfo_id', 'doctorInfo_id','date'], // SELECT id From "Todos" WHERE is_completed = true;
         where: {
-            is_active: true
+            is_active: is_active
         }
     })
     return res;
 }
+
+export const listAppointmentForPatient =async (uid: string, is_active: boolean) => {
+    const res = await Appointment.findAll({
+        attributes: ['id', 'patientInfo_id', 'doctorInfo_id','date','is_active'], // SELECT id From "Todos" WHERE is_completed = true;
+        where: {
+            patientInfo_id: uid,
+            is_active: is_active
+        }
+    })
+    return res;
+}
+
 
 export const createAppointment = async (patientInfo_id:string, doctorInfo_id: string, date: Date) => {
     try {
@@ -85,7 +100,25 @@ export const fetchAppointmentByDoctorId = async (doctor_id: string) => {
 }
 
 
-export const fetchAppointmentByPatientId = async (patientInfo_id: string) => {
+export const fetchAppointmentByPatientId = async (doctorUID:string, patientInfo_id: string) => {
+    try {
+        const foundAppointment = await Appointment.findAll({
+            where: {
+                patientInfo_id: patientInfo_id,
+                doctorInfo_id: doctorUID
+            }
+        });
+
+        return foundAppointment;
+
+    } catch (error) {
+        console.error(error);
+
+        return null;
+    }
+}
+
+export const fetchAppointmentByOnlyPatientId = async (patientInfo_id: string) => {
     try {
         const foundAppointment = await Appointment.findAll({
             where: {
@@ -103,14 +136,17 @@ export const fetchAppointmentByPatientId = async (patientInfo_id: string) => {
 }
 
 
-export const fetchAppointmentByDate = async (nDate: Date) => {
+export const fetchAppointmentByDate = async (doctorUID:string, nDate: Date) => {
     try {
+     
         const foundAppointment = await Appointment.findAll({
             where: {
+                doctorInfo_id: doctorUID,
                 date: nDate
             }
         });
-
+        
+        console.log(foundAppointment);
         return foundAppointment;
 
     } catch (error) {
@@ -140,13 +176,14 @@ export const fetchAppointmentByIsDelete = async(is_active:boolean) => {
 
 
 
-export const updateAppointmentById = async (id: number, AppointmentModel: InferAttributes<Appointment>) => {
+export const updateAppointmentById = async (uid: string, id: number, AppointmentModel: InferAttributes<Appointment>) => {
 
     try {
         const foo = await Appointment.update({
             date: AppointmentModel.date
         }, {
             where: {
+                doctorInfo_id:uid,
                 id: id
             }
         })
@@ -154,7 +191,7 @@ export const updateAppointmentById = async (id: number, AppointmentModel: InferA
         return foo;
     } catch (error) {
         console.error(error);
-        return null;
+        return 'Something went wrong';
     }
 
 

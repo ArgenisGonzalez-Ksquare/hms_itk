@@ -20,6 +20,7 @@ const initPatienInfo = (sequelize) => {
             defaultValue: true
         }
     }, {
+        tableName: "patientInfo",
         sequelize // Instance of sequelize that reflects the connection
     });
     /*     PatientInfo.hasMany(Appointment);

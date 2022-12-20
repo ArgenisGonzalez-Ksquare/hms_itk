@@ -1,7 +1,9 @@
 import { Router, Request, Response } from 'express';
 import { userInfo } from 'os';
-//import { createTodo, deleteTodoById, fetchTodoById, updateTodoById } from '../repository/Todo.repo'
 import { createPatientInfo, fetchPatientById, updatePatientById, deletePatientById, listPatient, paginatedList} from '../controllers/patientInfo.repo';
+import { isAuthenticated } from "../middlewares/isAuthentificated";
+import { isAuthorized } from "../middlewares/isAuthorized";
+import * as admin from 'firebase-admin';
 
 export const PatientInfo = Router();
 
@@ -60,21 +62,14 @@ PatientInfo.get('/allpatients', async (req: Request, res: Response) => {
 })
 
 
-PatientInfo.post('/newPatient', async (req: Request, res: Response) => {
+PatientInfo.post('/newPatient', isAuthenticated, isAuthorized({roles: ['patient'], allowSameUser:true}), async (req: Request, res: Response) => {
     const FullName: string = req.body.full_name as string;
-    const UserId: number = req.body.user_id as number;
+    const UserId: string = res.locals.uid;
     const Birthdate: Date = req.body.birthdate as Date;
 
+    console.log(UserId);
     
-    //SI NO ES PATIENT NO PUEDE VER
-    if(req.headers['role'] !== 'patient'){
-        return res.status(402).send({
-            error: "Not Authorized"
-        })
-    }
-
-
-    if (!FullName || !Birthdate) {
+    if (!FullName || !Birthdate || !UserId) {
         res.status(400)
         return res.send({
             message: 'Some information is missing'
@@ -83,7 +78,7 @@ PatientInfo.post('/newPatient', async (req: Request, res: Response) => {
 
     // Si tengo mi description
     // Debo crear un nuevo TODO y guardarlo a la DB
-    const newPatientId = await createPatientInfo(FullName, Birthdate);
+    const newPatientId = await createPatientInfo(FullName, UserId,  Birthdate);
 
     res.status(201);
     res.send({

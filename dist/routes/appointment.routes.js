@@ -20,23 +20,20 @@ exports.Appointment = (0, express_1.Router)();
    ------------------------------------------------------------------------------------
 
 
-    Create a series of endpoints that need to LIST, Read, Create and Delete appointments
-    Create pagination for this resource
-    The delete needs to be soft (do not erase the record)
-    Only a user with the role of patient can access these endpoints.
+    Create a series of endpoints that need to LIST, Read, Create and Delete appointments (DONE)
+    Create pagination for this resource  (DONE)
+    The delete needs to be soft (do not erase the record) (DONE)
+    Only a user with the role of patient can access these endpoints. (DONE)
 
     ************************************************************************************
     ------------------------------------------------------------------------------------
  */
 /* ************************* L I S T ****************************************** */
-exports.Appointment.get('/allAppointment', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    //SI NO ES ApplistAppointment NO PUEDE VER
-    if (req.headers['role'] !== 'admin') {
-        return res.status(402).send({
-            error: "Not Authorized"
-        });
-    }
-    let list = yield (0, appointment_repo_1.listAppointment)(false);
+exports.Appointment.get('/allAppointment/:patientID', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const appointmentId = req.params['patientID'];
+    let enable = Boolean(req.query['enable']);
+    console.log(enable);
+    let list = yield (0, appointment_repo_1.listAppointmentForPatient)(appointmentId, enable);
     if (!list) {
         res.status(400);
         return res.send({
@@ -49,9 +46,8 @@ exports.Appointment.get('/allAppointment', (req, res) => __awaiter(void 0, void 
     });
 }));
 /* ************************** C R E A T E ******************************************* */
-exports.Appointment.post('/newAppointment', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['patient'], allowSameUser: false }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(res.locals);
-    const patientInfo_id = req.body.patientInfo_id;
+exports.Appointment.post('/newAppointment', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['patient'], allowSameUser: true }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const patientInfo_id = res.locals.uid;
     const doctorInfo_id = req.body.doctorInfo_id;
     const date = req.body.date;
     if (!patientInfo_id || !doctorInfo_id || !date) {
@@ -67,14 +63,9 @@ exports.Appointment.post('/newAppointment', isAuthentificated_1.isAuthenticated,
     });
 }));
 /* ************************** R E A D ******************************************* */
-exports.Appointment.get('/:appointmentId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.Appointment.get('/:appointmentId', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['patient'], allowSameUser: true }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const appointmentId = Number(req.params['appointmentId']);
-    //Only a user with the role of patient can access these endpoints. 
-    if (req.headers['role'] !== 'patient') {
-        return res.status(402).send({
-            error: "Not Authorized"
-        });
-    }
+    console.log(res.locals);
     if (appointmentId <= 0) {
         res.status(400);
         return res.send({
@@ -89,44 +80,43 @@ exports.Appointment.get('/:appointmentId', (req, res) => __awaiter(void 0, void 
         });
     }
     // TodoId es mayor a 0 y Todo con el TodoId existe en la DB
+    if (foundAppointment.patientInfo_id !== res.locals.uid) {
+        res.status(400).send({
+            message: 'This appointment ID dont belongs to you'
+        });
+    }
     res.status(200);
     res.send(foundAppointment);
 }));
 /* ************************** D E L E T E ******************************************* */
-exports.Appointment.delete('/:appointmentId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.Appointment.delete('/:appointmentId', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['patient'], allowSameUser: true }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const appointmentId = Number(req.params['appointmentId']);
-    //Only a user with the role of patient can access these endpoints. 
-    if (req.headers['role'] !== 'patient') {
-        return res.status(402).send({
-            error: "Not Authorized"
-        });
-    }
     if (appointmentId <= 0) {
         res.status(400);
         return res.send({
             error: 'Invalid id'
         });
     }
-    const ar = yield (0, appointment_repo_1.deleteAppointmentById)(appointmentId);
-    if (!ar) {
-        return res.status(400).send({
-            error: 'Cannot delete'
-        });
+    const foundAppointment = yield (0, appointment_repo_1.fetchAppointmentById)(appointmentId);
+    if ((foundAppointment === null || foundAppointment === void 0 ? void 0 : foundAppointment.patientInfo_id) === res.locals.uid) {
+        const ar = yield (0, appointment_repo_1.deleteAppointmentById)(appointmentId);
+        if (!ar) {
+            return res.status(400).send({
+                error: 'Cannot delete'
+            });
+        }
+        return res.sendStatus(200);
     }
-    return res.sendStatus(200);
+    else {
+        res.send('This appointment dont belongs to you');
+    }
 }));
 /* ************************** P A G I N A T I O N ******************************************* */
-exports.Appointment.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    //SI NO ES ApplistAppointment NO PUEDE VER
-    if (req.headers['role'] !== 'patient') {
-        return res.status(402).send({
-            error: "Not Authorized"
-        });
-    }
+exports.Appointment.get('/', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['patient'], allowSameUser: true }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let limit = Number(req.query['size']);
     let offset = 0 + Number(req.query['page']) - 1 * limit;
-    console.log(limit, offset);
-    const list = yield (0, appointment_repo_1.paginatedList)(limit, offset);
+    const uid = res.locals.uid;
+    const list = yield (0, appointment_repo_1.paginatedList)(uid, limit, offset);
     res.status(200);
     res.send(list);
 }));
@@ -135,11 +125,11 @@ exports.Appointment.get('/', (req, res) => __awaiter(void 0, void 0, void 0, fun
    ------------------------------------------------------------------------------------
 
 
-    Create an endpoint that reads from the same Model created in the previous model but only returns the appointments assigned to this doctor
-    Create an endpoint that allows a doctor to modify the date or time of the appointment and only that.
-    Create filters that allow a doctor to get more specific information like byDate, byPatient, and orderBy=asc|desc.
+    Create an endpoint that reads from the same Model created in the previous model but only returns the appointments assigned to this doctor (Done)
+    Create an endpoint that allows a doctor to modify the date or time of the appointment and only that. (Done)
+    Create filters that allow a doctor to get more specific information like byDate, byPatient, and orderBy=asc|desc. (Almost Done)
     Create pagination for this resource
-    Only a user with the role of doctor can access these endpoints.
+    Only a user with the role of doctor can access these endpoints.  (Done)
     Any requirements of this module can change at a later stage
 
     ************************************************************************************
@@ -147,20 +137,8 @@ exports.Appointment.get('/', (req, res) => __awaiter(void 0, void 0, void 0, fun
  */
 /* ************************* L I S T ****************************************** */
 /* Create an endpoint that reads from the same Model created in the previous model but only returns the appointments assigned to this doctor */
-exports.Appointment.get('/doctorAppointments/:doctorId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const doctorId = String(req.params['doctorId']);
-    //Only a user with the role of doctor can access these endpoints. 
-    if (req.headers['role'] !== 'doctor') {
-        return res.status(401).send({
-            error: "Not Authorized"
-        });
-    }
-    if (Number(doctorId) <= 0) {
-        res.status(400);
-        return res.send({
-            error: 'Invalid id'
-        });
-    }
+exports.Appointment.get('/doctor/myAppointments/', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['doctor'], allowSameUser: true }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const doctorId = res.locals.uid;
     const foundAppointment = yield (0, appointment_repo_1.fetchAppointmentByDoctorId)(doctorId);
     if (!foundAppointment) {
         res.status(400);
@@ -173,22 +151,17 @@ exports.Appointment.get('/doctorAppointments/:doctorId', (req, res) => __awaiter
     res.send(foundAppointment);
 }));
 /* Create an endpoint that allows a doctor to modify the date or time of the appointment and only that. */
-exports.Appointment.put('/:appointmentId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.Appointment.put('/doctor/modifyAppointment/:appointmentId', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['doctor'], allowSameUser: true }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const appointmentId = Number(req.params['appointmentId']);
     const body = req.body;
-    //SOnly a user with the role of doctor can access these endpoints. 
-    if (req.headers['role'] !== 'doctor') {
-        return res.status(402).send({
-            error: "Not Authorized"
-        });
-    }
+    console.log(res.locals.uid);
     if (appointmentId <= 0) {
         res.status(400);
         return res.send({
             error: 'Invalid id'
         });
     }
-    const affectedRows = yield (0, appointment_repo_1.updateAppointmentById)(appointmentId, body);
+    const affectedRows = yield (0, appointment_repo_1.updateAppointmentById)(res.locals.uid, appointmentId, body);
     console.log("----------------");
     console.log(affectedRows);
     if (!affectedRows) {
@@ -208,22 +181,15 @@ exports.Appointment.put('/:appointmentId', (req, res) => __awaiter(void 0, void 
     return res.send(foundAppointment);
 }));
 //Filter by Patient 
-exports.Appointment.get('/PatientAppointments/:patientId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.Appointment.get('/doctor/myPatientAppointments/:patientId', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['doctor'], allowSameUser: true }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const patientId = String(req.params['patientId']);
-    let recieveRole = req.headers['role'];
-    //Only a user with the role of doctor can access these endpoints. 
-    if (recieveRole !== 'doctor') {
-        return res.status(401).send({
-            error: "Not Authorized"
-        });
-    }
     if (Number(patientId) <= 0) {
         res.status(400);
         return res.send({
             error: 'Invalid id'
         });
     }
-    const foundAppointment = yield (0, appointment_repo_1.fetchAppointmentByPatientId)(patientId);
+    const foundAppointment = yield (0, appointment_repo_1.fetchAppointmentByPatientId)(res.locals.uid, patientId);
     if (!foundAppointment) {
         res.status(400);
         return res.send({
@@ -235,21 +201,16 @@ exports.Appointment.get('/PatientAppointments/:patientId', (req, res) => __await
     res.send(foundAppointment);
 }));
 //Filter by date 
-exports.Appointment.get('/DateAppointment/putDate', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.Appointment.get('/doctor/AppointmensPerDays', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['doctor'], allowSameUser: true }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const date = req.body.date;
-    //Only a user with the role of doctor can access these endpoints. 
-    if (req.headers['role'] !== 'doctor') {
-        return res.status(401).send({
-            error: "Not Authorized"
-        });
-    }
+    console.log(res.locals);
     if (!date) {
         res.status(400);
         return res.send({
             error: 'Invalid format for date'
         });
     }
-    const foundAppointment = yield (0, appointment_repo_1.fetchAppointmentByDate)(date);
+    const foundAppointment = yield (0, appointment_repo_1.fetchAppointmentByDate)(res.locals.uid, date);
     if (!foundAppointment) {
         res.status(400);
         return res.send({
@@ -265,34 +226,36 @@ exports.Appointment.get('/DateAppointment/putDate', (req, res) => __awaiter(void
    ------------------------------------------------------------------------------------
 
 
-    Create an endpoint where an admin can create a new doctor account (user).
-    Create an endpoint that can modify the is_active property from the User model back to true.
-    Create an endpoint that would LIST all the appointments in the table
+    Create an endpoint where an admin can create a new doctor account (user). (done)
+    Create an endpoint that can modify the is_active property from the User model back to true. (done)
+    Create an endpoint that would LIST all the appointments in the table (done)
     [Appointments] Create pagination filters for the previous endpoint
-    [Appointments] Create a filter where you can pass a patientId and only see the appointments of that user
-    [Appointments] Create a filter where you can pass a doctorId and only see the appointments where the doctor is in charge
-    [Appointments] Create a filter where you can receive the information based on is_deleted property
+    [Appointments] Create a filter where you can pass a patientId and only see the appointments of that user  (done)
+    [Appointments] Create a filter where you can pass a doctorId and only see the appointments where the doctor is in charge (done)
+    [Appointments] Create a filter where you can receive the information based on is_deleted property (done)
     [Appointments] Create a filter where you can modify the order of the information do this by the patientId and the doctorId
     Any requirements of this module can change at a later stage
 
     ************************************************************************************
     ------------------------------------------------------------------------------------
  */
-//[Appointments] Create a filter where you can pass a doctorId and only see the appointments where the doctor is in charge 
-exports.Appointment.get('/AdminAppointmentsDoctors/:doctorId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const doctorId = String(req.params['doctorId']);
-    //Only a user with the role of doctor can access these endpoints. 
-    if (req.headers['role'] !== 'admin') {
-        return res.status(401).send({
-            error: "Not Authorized"
-        });
-    }
-    if (Number(doctorId) <= 0) {
+/* ************************* L I S T ****************************************** */
+exports.Appointment.get('/all/Appointment', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['admin'], allowSameUser: false }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    let list = yield (0, appointment_repo_1.listAppointment)(false);
+    if (!list) {
         res.status(400);
         return res.send({
-            error: 'Invalid id'
+            error: 'Empty List'
         });
     }
+    res.status(200);
+    res.send({
+        list
+    });
+}));
+//[Appointments] Create a filter where you can pass a doctorId and only see the appointments where the doctor is in charge 
+exports.Appointment.get('/AdminAppointmentsDoctors/:doctorId', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['admin'], allowSameUser: false }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const doctorId = String(req.params['doctorId']);
     const foundAppointment = yield (0, appointment_repo_1.fetchAppointmentByDoctorId)(doctorId);
     if (!foundAppointment) {
         res.status(400);
@@ -305,22 +268,10 @@ exports.Appointment.get('/AdminAppointmentsDoctors/:doctorId', (req, res) => __a
     res.send(foundAppointment);
 }));
 //[Appointments] Create a filter where you can pass a patientId and only see the appointments of that user 
-exports.Appointment.get('/AdminAppointmentsPatients/:patientId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.Appointment.get('/AdminAppointmentsPatients/:patientId', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['admin'], allowSameUser: false }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log(res.locals);
     const patientId = String(req.params['patientId']);
-    let recieveRole = req.headers['role'];
-    //Only a user with the role of doctor can access these endpoints. 
-    if (recieveRole !== 'admin') {
-        return res.status(401).send({
-            error: "Not Authorized"
-        });
-    }
-    if (Number(patientId) <= 0) {
-        res.status(400);
-        return res.send({
-            error: 'Invalid id'
-        });
-    }
-    const foundAppointment = yield (0, appointment_repo_1.fetchAppointmentByPatientId)(patientId);
+    const foundAppointment = yield (0, appointment_repo_1.fetchAppointmentByOnlyPatientId)(patientId);
     if (!foundAppointment) {
         res.status(400);
         return res.send({
@@ -332,13 +283,8 @@ exports.Appointment.get('/AdminAppointmentsPatients/:patientId', (req, res) => _
     res.send(foundAppointment);
 }));
 //[Appointments] Create a filter where you can receive the information based on is_deleted property 
-exports.Appointment.get('/admin/DeletesAppointment/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    //Only a user with the role of admin can access these endpoints. 
-    if (req.headers['role'] !== 'admin') {
-        return res.status(401).send({
-            error: "Not Authorized"
-        });
-    }
+exports.Appointment.get('/admin/DeletesAppointment/', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['admin'], allowSameUser: false }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log(res.locals);
     const foundAppointment = yield (0, appointment_repo_1.fetchAppointmentByIsDelete)(false);
     if (!foundAppointment) {
         res.status(400);

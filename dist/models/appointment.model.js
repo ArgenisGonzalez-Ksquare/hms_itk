@@ -12,15 +12,30 @@ const initAppointmentInfo = (sequelize) => {
             autoIncrement: true,
             primaryKey: true
         },
-        patientInfo_id: sequelize_1.DataTypes.STRING,
-        doctorInfo_id: sequelize_1.DataTypes.STRING,
+        patientInfo_id: {
+            type: sequelize_1.DataTypes.STRING,
+            /*             references: {
+                            model: 'patientInfo', // 'fathers' refers to table name
+                            key: 'id', // 'id' refers to column name in fathers table
+                        } */
+        },
+        doctorInfo_id: {
+            type: sequelize_1.DataTypes.STRING,
+            /*             references: {
+                            model: 'doctorInfo', // 'fathers' refers to table name
+                            key: 'id', // 'id' refers to column name in fathers table
+                        } */
+        },
         date: sequelize_1.DataTypes.DATE,
         is_active: {
             type: sequelize_1.DataTypes.BOOLEAN,
             defaultValue: false
         }
     }, {
+        tableName: "appointments",
         sequelize // Instance of sequelize that reflects the connection
     });
+    /* PatientInfo.hasMany(Appointment, { foreignKey: 'patienInfo_id', foreignKeyConstraint: true });
+    DoctorInfo.hasMany(Appointment, { foreignKey: 'doctorInfo_id', foreignKeyConstraint: true }); */
 };
 exports.initAppointmentInfo = initAppointmentInfo;

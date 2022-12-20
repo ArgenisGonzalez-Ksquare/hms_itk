@@ -1,6 +1,4 @@
 import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes, Sequelize } from "sequelize";
-import { Appointment } from "./appointment.model";
-import { User } from "./user.model"
 
 
 export class PatientInfo extends Model<InferAttributes<PatientInfo>, InferCreationAttributes<PatientInfo>> {
@@ -28,6 +26,7 @@ export const initPatienInfo = (sequelize: Sequelize) => {
         }
     
 }, {
+    tableName: "patientInfo",
     sequelize // Instance of sequelize that reflects the connection
 })
 /*     PatientInfo.hasMany(Appointment);
