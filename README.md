@@ -56,7 +56,10 @@ password: 123456
 
 ```
 
-Generate your token for a admin to create doctors accounts and more. *Remember that a patient can make a sing up with authentication.*
+Generate your token for a admin to create doctors accounts and more. *Remember that a patient can make a sing up with out authentication.* For the endpoints that the authentication and authorization is necesary, please, be sure to put on the header a key "Authorization" and in the value put Bearer <token>, this is the token that you generate in the endpoint `tokenGenerator`.
+  
+![image](https://user-images.githubusercontent.com/113387032/208967789-92e07d2b-b649-41be-b05b-04c033911c82.png)
+
 
 ## Data Modeling of the Project
 
