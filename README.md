@@ -1,4 +1,6 @@
 # Health Management System | ITK
+### Argenis J. González
+
 
 ## Getting started
 
