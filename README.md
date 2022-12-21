@@ -19,6 +19,15 @@ DB_HOSTNAME=localhost
 HOST=localhost:5000
 GOOGLE_APPLICATION_CREDENTIALS=C:\firebase\firebase.json.json
 ```
+*Be sure to create the `hospital` database on sql Shell or pg admin, as well you have to create the user `admin_hospital` and with hem permission for createDB and set as the owner of `hospital`*, for more help share with you the basics commands of sql shell
+
+```
+CREATE DATABASE hospital;
+CREATE USER admin_hospital WITH PASSWORD 'root';
+ALTER USER admin_hospital WITH CREATEDB;
+ALTER DATABASE hospital OWNER TO admin_hospital;
+
+```
 
 Please be sure of create the `firebase.json` file in the same location you saw in the `.env`
 this is the structure of the json
