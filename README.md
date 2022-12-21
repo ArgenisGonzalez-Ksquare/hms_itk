@@ -1,14 +1,16 @@
 # hms_itk
 
-Getting started
+##Getting started
 
-Clone the repo
+###Clone the repo
 https://github.com/ArgenisGonzalez-Ksquare/hms_itk.git
 
-Install Node Dependencies
+###Install Node Dependencies
 Is necessary to install some depedencies, please check the package.json and install everithing that is needed
 
-This Project is running on a postgres database, is necesary to you create the next .env file with the followings variables:
+###This Project is running on a postgres database, is necesary to you create the next .env file with the followings variables:
+
+```
 DB_PASS=root
 DB_USER=admin_hospital
 DB_NAME=hospital
@@ -16,6 +18,7 @@ PORT=5000
 DB_HOSTNAME=localhost
 HOST=localhost:5000
 GOOGLE_APPLICATION_CREDENTIALS=C:\firebase\firebase.json.json
+```
 
 Please be sure of create the firebase.json file in the same location you saw in the .env
 this is the structure of the json
