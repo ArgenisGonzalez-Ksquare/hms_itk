@@ -39,6 +39,14 @@ this is the structure of the json
 
 ```
 
+*As you know, you have been provider of a Postman collection for check the endpoints, there you will find a folder with a tokenGenerator. A will share with you an admin account for the test*
+
+```
+email: admin@admin.com
+password: 123456
+
+```
+
 Data Modeling of the Project
 
 PatientInfo
