@@ -18,6 +18,7 @@ PORT=5000
 DB_HOSTNAME=localhost
 HOST=localhost:5000
 GOOGLE_APPLICATION_CREDENTIALS=C:\firebase\firebase.json.json
+SUPER_USER=admin@admin.com
 ```
 *Be sure to create the `hospital` database on sql Shell or pg admin, as well you have to create the user `admin_hospital` and give him permission for createDB and set as the owner of `hospital`*, for more help I share with you the commands you have to put on sql shell
 
