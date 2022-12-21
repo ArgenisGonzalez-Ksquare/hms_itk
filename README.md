@@ -3,7 +3,7 @@
 ## Getting started
 
 ### Clone the repo
-https://github.com/ArgenisGonzalez-Ksquare/hms_itk.git
+` https://github.com/ArgenisGonzalez-Ksquare/hms_itk.git `
 
 ### Install Node Dependencies
 Is necessary to install some depedencies, please check the `package.json` and install everithing that is needed
