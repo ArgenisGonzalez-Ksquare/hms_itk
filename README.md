@@ -1,4 +1,4 @@
-# hms_itk
+# Health Management System | ITK
 
 ## Getting started
 
