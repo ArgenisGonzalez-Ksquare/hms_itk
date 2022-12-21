@@ -19,7 +19,7 @@ DB_HOSTNAME=localhost
 HOST=localhost:5000
 GOOGLE_APPLICATION_CREDENTIALS=C:\firebase\firebase.json.json
 ```
-*Be sure to create the `hospital` database on sql Shell or pg admin, as well you have to create the user `admin_hospital` and with hem permission for createDB and set as the owner of `hospital`*, for more help share with you the basics commands of sql shell
+*Be sure to create the `hospital` database on sql Shell or pg admin, as well you have to create the user `admin_hospital` and give him permission for createDB and set as the owner of `hospital`*, for more help I share with you the commands you have to put on sql shell
 
 ```
 CREATE DATABASE hospital;
@@ -29,8 +29,8 @@ ALTER DATABASE hospital OWNER TO admin_hospital;
 
 ```
 
-Please be sure of create the `firebase.json` file in the same location you saw in the `.env`
-this is the structure of the json
+Please be sure of create the `firebase.json` file in the same PATH you saw in the `.env`.
+This is the structure of the json
 
 ```
 {
@@ -48,13 +48,15 @@ this is the structure of the json
 
 ```
 
-*As you know, you have been provider of a Postman collection for check the endpoints, there you will find a folder with a tokenGenerator. A will share with you an admin account for the test*
+*As you know, you have been provider of a `Postman collection` for check the endpoints, there you will find a folder with a tokenGenerator. A will share with you an admin account for the test*
 
 ```
 email: admin@admin.com
 password: 123456
 
 ```
+
+Generate your token for a admin to create doctors accounts and more. *Remember that a patient can make a sing up with authentication.*
 
 ## Data Modeling of the Project
 
