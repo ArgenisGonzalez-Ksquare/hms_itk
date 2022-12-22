@@ -24,7 +24,7 @@ const mapToUser = (user:admin.auth.UserRecord) =>  {
         email: user.email,
         userName: user.displayName,
         role,
-        isDisableL: user.disabled
+        isDisable: user.disabled
     }
 };
 
@@ -42,7 +42,7 @@ export const createUser =async (
     })
 
     await admin.auth().setCustomUserClaims(uid, {role})
-    return uid;
+    return [uid, role];
 }
 
 
@@ -50,6 +50,8 @@ export const readUser = async(uid:string) => {
     const user = await admin.auth().getUser(uid);
     return mapToUser(user);   
 }
+
+
 
 export const getAllUsers = async () => {
     const listOfUsers = await admin.auth().listUsers(10);
@@ -68,7 +70,12 @@ export const updateUser = async (uid:string, displayName: string, email:string, 
 }
 
 export const disableUser =async (uid:string, disabled: boolean) => {
+    
+    
     const user = await admin.auth().updateUser(uid, {
         disabled
+        
     })
+    return 'status changed';
 }
+

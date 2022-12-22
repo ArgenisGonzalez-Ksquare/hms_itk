@@ -11,17 +11,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PatientInfo = void 0;
 const express_1 = require("express");
-//import { createTodo, deleteTodoById, fetchTodoById, updateTodoById } from '../repository/Todo.repo'
 const patientInfo_repo_1 = require("../controllers/patientInfo.repo");
+const isAuthentificated_1 = require("../middlewares/isAuthentificated");
+const isAuthorized_1 = require("../middlewares/isAuthorized");
 exports.PatientInfo = (0, express_1.Router)();
 //pagination
-exports.PatientInfo.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    //SI NO ES PATIENT NO PUEDE VER
-    if (req.headers['role'] !== 'patient') {
-        return res.status(402).send({
-            error: "Not Authorized"
-        });
-    }
+exports.PatientInfo.get('/', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['admin'], allowSameUser: false }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let limit = Number(req.query['size']);
     let offset = 0 + Number(req.query['page']) - 1 * limit;
     console.log(limit, offset);
@@ -29,13 +24,7 @@ exports.PatientInfo.get('/', (req, res) => __awaiter(void 0, void 0, void 0, fun
     res.status(200);
     res.send(list);
 }));
-exports.PatientInfo.get('/allpatients', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    //SI NO ES PATIENT NO PUEDE VER
-    if (req.headers['role'] !== 'patient') {
-        return res.status(402).send({
-            error: "Not Authorized"
-        });
-    }
+exports.PatientInfo.get('/allpatients', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['admin'], allowSameUser: false }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let list = yield (0, patientInfo_repo_1.listPatient)(false);
     if (!list) {
         res.status(400);
@@ -48,70 +37,38 @@ exports.PatientInfo.get('/allpatients', (req, res) => __awaiter(void 0, void 0, 
         list
     });
 }));
-exports.PatientInfo.post('/newPatient', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.PatientInfo.post('/newPatient', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['patient'], allowSameUser: true }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const FullName = req.body.full_name;
-    const UserId = req.body.user_id;
+    const UserId = res.locals.uid;
     const Birthdate = req.body.birthdate;
-    //SI NO ES PATIENT NO PUEDE VER
-    if (req.headers['role'] !== 'patient') {
-        return res.status(402).send({
-            error: "Not Authorized"
-        });
-    }
-    if (!FullName || !Birthdate) {
+    console.log(UserId);
+    if (!FullName || !Birthdate || !UserId) {
         res.status(400);
         return res.send({
             message: 'Some information is missing'
         });
     }
-    // Si tengo mi description
-    // Debo crear un nuevo TODO y guardarlo a la DB
-    const newPatientId = yield (0, patientInfo_repo_1.createPatientInfo)(FullName, Birthdate);
+    const newPatientId = yield (0, patientInfo_repo_1.createPatientInfo)(FullName, UserId, Birthdate);
     res.status(201);
     res.send({
         newPatientId
     });
 }));
-exports.PatientInfo.get('/:patienInfoId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.PatientInfo.get('/:patienInfoId', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['admin', 'patient'], allowSameUser: true }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const PatientId = Number(req.params['patienInfoId']);
-    //SI NO ES PATIENT NO PUEDE VER
-    if (req.headers['role'] !== 'patient') {
-        return res.status(402).send({
-            error: "Not Authorized"
-        });
-    }
-    if (PatientId <= 0) {
-        res.status(400);
-        return res.send({
-            error: 'Invalid id'
-        });
-    }
     const foundPatient = yield (0, patientInfo_repo_1.fetchPatientById)(PatientId);
     if (!foundPatient) {
         res.status(400);
         return res.send({
-            error: 'Todo not found.'
+            error: 'Patient not found.'
         });
     }
-    // TodoId es mayor a 0 y Todo con el TodoId existe en la DB
     res.status(200);
     res.send(foundPatient);
 }));
-exports.PatientInfo.put('/:patientId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.PatientInfo.put('/:patientId', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['admin', 'patient'], allowSameUser: true }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const patientId = Number(req.params['patientId']);
     const body = req.body;
-    //SI NO ES PATIENT NO PUEDE VER
-    if (req.headers['role'] !== 'patient') {
-        return res.status(402).send({
-            error: "Not Authorized"
-        });
-    }
-    if (patientId <= 0) {
-        res.status(400);
-        return res.send({
-            error: 'Invalid id'
-        });
-    }
     const affectedRows = yield (0, patientInfo_repo_1.updatePatientById)(patientId, body);
     console.log("----------------");
     console.log(affectedRows);
@@ -131,20 +88,8 @@ exports.PatientInfo.put('/:patientId', (req, res) => __awaiter(void 0, void 0, v
     res.status(200);
     return res.send(foundPatient);
 }));
-exports.PatientInfo.delete('/:patientId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.PatientInfo.delete('/:patientId', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['admin', 'patient'], allowSameUser: true }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const patientId = Number(req.params['patientId']);
-    //SI NO ES PATIENT NO PUEDE VER
-    if (req.headers['role'] !== 'patient') {
-        return res.status(402).send({
-            error: "Not Authorized"
-        });
-    }
-    if (patientId <= 0) {
-        res.status(400);
-        return res.send({
-            error: 'Invalid id'
-        });
-    }
     const ar = yield (0, patientInfo_repo_1.deletePatientById)(patientId);
     if (!ar) {
         return res.status(400).send({

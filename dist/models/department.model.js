@@ -21,6 +21,7 @@ const initDepartment = (sequelize) => {
             defaultValue: true
         }
     }, {
+        tableName: "deparment",
         sequelize // Instance of sequelize that reflects the connection
     });
 };

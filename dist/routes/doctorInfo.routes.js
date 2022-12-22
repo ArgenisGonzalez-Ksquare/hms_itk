@@ -13,15 +13,11 @@ exports.DoctorInfo = void 0;
 const express_1 = require("express");
 //import { createTodo, deleteTodoById, fetchTodoById, updateTodoById } from '../repository/Todo.repo'
 const doctorInfo_repo_1 = require("../controllers/doctorInfo.repo");
+const isAuthentificated_1 = require("../middlewares/isAuthentificated");
+const isAuthorized_1 = require("../middlewares/isAuthorized");
 exports.DoctorInfo = (0, express_1.Router)();
 //pagination
-exports.DoctorInfo.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    //SI NO ES Doctor NO PUEDE VER
-    if (req.headers['role'] !== 'admin') {
-        return res.status(402).send({
-            error: "Not Authorized"
-        });
-    }
+exports.DoctorInfo.get('/', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['admin'], allowSameUser: false }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let limit = Number(req.query['size']);
     let offset = 0 + Number(req.query['page']) - 1 * limit;
     console.log(limit, offset);
@@ -29,13 +25,7 @@ exports.DoctorInfo.get('/', (req, res) => __awaiter(void 0, void 0, void 0, func
     res.status(200);
     res.send(list);
 }));
-exports.DoctorInfo.get('/allDoctors', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    //SI NO ES Doctor NO PUEDE VER
-    if (req.headers['role'] !== 'admin') {
-        return res.status(402).send({
-            error: "Not Authorized"
-        });
-    }
+exports.DoctorInfo.get('/allDoctors', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['admin'], allowSameUser: true }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let list = yield (0, doctorInfo_repo_1.listDoctor)(false);
     if (!list) {
         res.status(400);
@@ -48,24 +38,18 @@ exports.DoctorInfo.get('/allDoctors', (req, res) => __awaiter(void 0, void 0, vo
         list
     });
 }));
-exports.DoctorInfo.post('/newDoctor', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+//Create an endpoint where an admin can create a new doctor account (user).  
+exports.DoctorInfo.post('/newDoctor', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['doctor'], allowSameUser: true }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const FullName = req.body.full_name;
-    const UserId = req.body.user_id;
+    const UserId = res.locals.uid;
     const Birthdate = req.body.birthdate;
-    //SI NO ES Doctor NO PUEDE VER
-    if (req.headers['role'] !== 'admin') {
-        return res.status(402).send({
-            error: "Not Authorized"
-        });
-    }
+    console.log(res.locals);
     if (!FullName || !Birthdate || !UserId) {
         res.status(400);
         return res.send({
             message: 'Some information is missing'
         });
     }
-    // Si tengo mi description
-    // Debo crear un nuevo TODO y guardarlo a la DB
     const newDoctorId = yield (0, doctorInfo_repo_1.createDoctorInfo)(FullName, UserId, Birthdate);
     res.status(201);
     res.send({
@@ -93,63 +77,6 @@ exports.DoctorInfo.get('/:doctorInfoId', (req, res) => __awaiter(void 0, void 0,
             error: 'Todo not found.'
         });
     }
-    // TodoId es mayor a 0 y Todo con el TodoId existe en la DB
     res.status(200);
     res.send(foundDoctor);
-}));
-exports.DoctorInfo.put('/:DoctorId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const DoctorId = Number(req.params['DoctorId']);
-    const body = req.body;
-    //SI NO ES Doctor NO PUEDE VER
-    if (req.headers['role'] !== 'admin') {
-        return res.status(402).send({
-            error: "Not Authorized"
-        });
-    }
-    if (DoctorId <= 0) {
-        res.status(400);
-        return res.send({
-            error: 'Invalid id'
-        });
-    }
-    const affectedRows = yield (0, doctorInfo_repo_1.updateDoctorById)(DoctorId, body);
-    console.log("----------------");
-    console.log(affectedRows);
-    if (!affectedRows) {
-        res.status(500);
-        return res.send({
-            error: 'Something went wrong! :)'
-        });
-    }
-    if (affectedRows[0] === 0) {
-        res.status(400);
-        return res.send({
-            error: 'Update failed'
-        });
-    }
-    const foundDoctor = yield (0, doctorInfo_repo_1.fetchDoctorById)(DoctorId);
-    res.status(200);
-    return res.send(foundDoctor);
-}));
-exports.DoctorInfo.delete('/:DoctorId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const DoctorId = Number(req.params['DoctorId']);
-    //SI NO ES Doctor NO PUEDE VER
-    if (req.headers['role'] !== 'admin') {
-        return res.status(402).send({
-            error: "Not Authorized"
-        });
-    }
-    if (DoctorId <= 0) {
-        res.status(400);
-        return res.send({
-            error: 'Invalid id'
-        });
-    }
-    const ar = yield (0, doctorInfo_repo_1.deleteDoctorById)(DoctorId);
-    if (!ar) {
-        return res.status(400).send({
-            error: 'Cannot delete'
-        });
-    }
-    return res.sendStatus(200);
 }));

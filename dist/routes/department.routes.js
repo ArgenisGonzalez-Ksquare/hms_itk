@@ -13,15 +13,11 @@ exports.Department = void 0;
 const express_1 = require("express");
 //import { createTodo, deleteTodoById, fetchTodoById, updateTodoById } from '../repository/Todo.repo'
 const department_repo_1 = require("../controllers/department.repo");
+const isAuthentificated_1 = require("../middlewares/isAuthentificated");
+const isAuthorized_1 = require("../middlewares/isAuthorized");
 exports.Department = (0, express_1.Router)();
 //pagination
-exports.Department.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    //SI NO ES PATIENT NO PUEDE VER
-    if ((req.headers['role'] !== 'admin')) {
-        return res.status(402).send({
-            error: "Not Authorized"
-        });
-    }
+exports.Department.get('/', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['admin'], allowSameUser: true }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let limit = Number(req.query['size']);
     let offset = 0 + Number(req.query['page']) - 1 * limit;
     console.log(limit, offset);
@@ -29,13 +25,7 @@ exports.Department.get('/', (req, res) => __awaiter(void 0, void 0, void 0, func
     res.status(200);
     res.send(list);
 }));
-exports.Department.get('/alldepartments', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    //SI NO ES PATIENT NO PUEDE VER
-    if (req.headers['role'] !== 'admin') {
-        return res.status(402).send({
-            error: "Not Authorized"
-        });
-    }
+exports.Department.get('/alldepartments', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['admin', 'doctor', 'patient'], allowSameUser: true }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let list = yield (0, department_repo_1.listDepartments)(false);
     if (!list) {
         res.status(400);
@@ -48,36 +38,22 @@ exports.Department.get('/alldepartments', (req, res) => __awaiter(void 0, void 0
         list
     });
 }));
-exports.Department.post('/newDepartment', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.Department.post('/newDepartment', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['admin'], allowSameUser: true }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const Department = req.body.department;
-    //SI NO ES admin NO PUEDE VER
-    if (req.headers['role'] !== 'admin') {
-        return res.status(400).send({
-            error: "Not Authorized"
-        });
-    }
     if (!Department) {
         res.status(400);
         return res.send({
             message: 'Some information is missing'
         });
     }
-    // Si tengo mi description
-    // Debo crear un nuevo TODO y guardarlo a la DB
     const newDepartmentId = yield (0, department_repo_1.createDepartment)(Department);
     res.status(201);
     res.send({
         newDepartmentId
     });
 }));
-exports.Department.get('/:departmentId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.Department.get('/:departmentId', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['admin', 'doctor', 'patient'], allowSameUser: true }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const departmentId = Number(req.params['departmentId']);
-    //SI NO ES PATIENT NO PUEDE VER
-    if (req.headers['role'] !== 'admin') {
-        return res.status(402).send({
-            error: "Not Authorized"
-        });
-    }
     if (departmentId <= 0) {
         res.status(400);
         return res.send({
@@ -95,15 +71,9 @@ exports.Department.get('/:departmentId', (req, res) => __awaiter(void 0, void 0,
     res.status(200);
     res.send(foundPatient);
 }));
-exports.Department.put('/:departmentId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.Department.put('/:departmentId', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['admin'], allowSameUser: true }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const departmentId = Number(req.params['departmentId']);
     const body = req.body;
-    //SI NO ES PATIENT NO PUEDE VER
-    if (req.headers['role'] !== 'admin') {
-        return res.status(402).send({
-            error: "Not Authorized"
-        });
-    }
     if (departmentId <= 0) {
         res.status(400);
         return res.send({
@@ -111,8 +81,6 @@ exports.Department.put('/:departmentId', (req, res) => __awaiter(void 0, void 0,
         });
     }
     const affectedRows = yield (0, department_repo_1.updateDepartmentById)(departmentId, body);
-    console.log("----------------");
-    console.log(affectedRows);
     if (!affectedRows) {
         res.status(500);
         return res.send({
@@ -129,14 +97,8 @@ exports.Department.put('/:departmentId', (req, res) => __awaiter(void 0, void 0,
     res.status(200);
     return res.send(foundDepartment);
 }));
-exports.Department.delete('/:departmentId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.Department.delete('/:departmentId', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['admin'], allowSameUser: true }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const departmentId = Number(req.params['departmentId']);
-    //SI NO ES PATIENT NO PUEDE VER
-    if (req.headers['role'] !== 'admin') {
-        return res.status(402).send({
-            error: "Not Authorized"
-        });
-    }
     if (departmentId <= 0) {
         res.status(400);
         return res.send({

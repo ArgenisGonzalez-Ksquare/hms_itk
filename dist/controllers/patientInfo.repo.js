@@ -40,10 +40,11 @@ const listPatient = (is_active) => __awaiter(void 0, void 0, void 0, function* (
     return res;
 });
 exports.listPatient = listPatient;
-const createPatientInfo = (full_name, birthdate) => __awaiter(void 0, void 0, void 0, function* () {
+const createPatientInfo = (full_name, user_id, birthdate) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const patient = yield patientInfo_model_1.PatientInfo.create({
             full_name,
+            user_id,
             birthdate,
         });
         return patient;
