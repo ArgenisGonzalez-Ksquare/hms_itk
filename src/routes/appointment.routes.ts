@@ -483,18 +483,18 @@ Appointment.get('/admin/DeletesAppointment/',  isAuthenticated, isAuthorized({ro
 
 Appointment.get('/admin/filterPatientOrDoctor/',  isAuthenticated, isAuthorized({roles: ['admin'], allowSameUser:false}), async (req: Request, res: Response) => {
 
+    let foundAppointment: any;
     let doctor_id = String(req.query['doctor_id']);
     let patient_id = String(req.query['patient_id']);
-    let foundAppointment: any;
+    
 
     if(doctor_id.length > 9){
         foundAppointment = await fetchAppointmentByDoctorId(doctor_id);
     }
 
-    if(patient_id.length  > 9){
+    if(patient_id.length > 9){
         foundAppointment = await listAppointmentForPatient(patient_id);  
     }
-    
     
     if (!foundAppointment) {
     
