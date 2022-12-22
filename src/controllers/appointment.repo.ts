@@ -23,7 +23,47 @@ export const paginatedList = async(uid: string, pLimit:number, pOffset:number) =
         console.error(error)
         return null
     }
+    
+}
 
+export const paginatedListDoctor = async(uid: string, pLimit:number, pOffset:number) =>{
+
+    try {
+        const res = await Appointment.findAll({
+            attributes: ['id', 'patientInfo_id', 'doctorInfo_id', 'date'],
+            limit: pLimit,
+            offset :pOffset,
+            where: {
+                doctorInfo_id: uid,
+                is_active: true
+                
+            }
+        })
+        return res
+    } catch (error) {
+        console.error(error)
+        return null
+    }
+    
+}
+
+export const paginatedAllAppointments = async(pLimit:number, pOffset:number, boolean:boolean) =>{
+
+    try {
+        const res = await Appointment.findAll({
+            attributes: ['id', 'patientInfo_id', 'doctorInfo_id', 'date'],
+            limit: pLimit,
+            offset :pOffset,
+            where: {
+                is_active: boolean
+                
+            }
+        })
+        return res
+    } catch (error) {
+        console.error(error)
+        return null
+    }
     
 }
 
@@ -39,14 +79,15 @@ export const listAppointment =async (is_active: boolean) => {
     return res;
 }
 
-export const listAppointmentForPatient =async (uid: string, is_active: boolean) => {
+export const listAppointmentForPatient =async (uid: string) => {
     const res = await Appointment.findAll({
         attributes: ['id', 'patientInfo_id', 'doctorInfo_id','date','is_active'], // SELECT id From "Todos" WHERE is_completed = true;
         where: {
             patientInfo_id: uid,
-            is_active: is_active
+            is_active: true
         }
     })
+    console.log(res)
     return res;
 }
 
@@ -117,6 +158,28 @@ export const fetchAppointmentByPatientId = async (doctorUID:string, patientInfo_
         return null;
     }
 }
+
+
+export const fetchAppointmentByOrder = async (doctorUID:string, Porder:string) => {
+    try {
+        const foundAppointment = await Appointment.findAll({
+            where: {
+                doctorInfo_id: doctorUID
+            }, order: [['id', `${Porder}`]],
+            attributes:['id', 'date', 'patientInfo_id']
+        });
+
+        console.log(foundAppointment)
+        return foundAppointment;
+
+    } catch (error) {
+        console.error(error);
+
+        return null;
+    }
+}
+
+
 
 export const fetchAppointmentByOnlyPatientId = async (patientInfo_id: string) => {
     try {

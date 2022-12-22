@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
 import { Role } from '../firebase';
+import dotenv from 'dotenv';
+dotenv.config();
 
+const SUPER_USER = <string>process.env.SUPER_USER;
 
 // Sirva como Middleware
 // Nos deje configurar que roles tienen acceso a un endpoint
@@ -10,7 +13,7 @@ export const isAuthorized = (options: { roles: Role[]; allowSameUser: boolean })
          const { uid, email, role } = res.locals;
          const { userId } = req.params;
 
-         if (email === 'SUPER USER') {
+         if (email === SUPER_USER) {
             return next();
          }
 
@@ -22,9 +25,7 @@ export const isAuthorized = (options: { roles: Role[]; allowSameUser: boolean })
             return next()
          }
 
-
          if (options.allowSameUser && userId && userId === uid) {
-            console.log('noooo')
             return next();
          }else{
             return res.status(403).send('No Auth');

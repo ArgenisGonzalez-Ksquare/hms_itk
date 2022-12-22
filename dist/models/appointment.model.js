@@ -29,7 +29,7 @@ const initAppointmentInfo = (sequelize) => {
         date: sequelize_1.DataTypes.DATE,
         is_active: {
             type: sequelize_1.DataTypes.BOOLEAN,
-            defaultValue: false
+            defaultValue: true
         }
     }, {
         tableName: "appointments",

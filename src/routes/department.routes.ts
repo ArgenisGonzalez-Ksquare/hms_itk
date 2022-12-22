@@ -2,22 +2,16 @@ import { Router, Request, Response } from 'express';
 import { userInfo } from 'os';
 //import { createTodo, deleteTodoById, fetchTodoById, updateTodoById } from '../repository/Todo.repo'
 import { paginatedList, listDepartments, createDepartment, fetchDepartmentById, updateDepartmentById, deleteDepartmentById}  from '../controllers/department.repo'
+import { isAuthenticated } from "../middlewares/isAuthentificated";
+import { isAuthorized } from "../middlewares/isAuthorized";
+
 
 export const Department = Router();
 
 
 //pagination
 
-Department.get('/', async (req:Request, res:Response) => {
-
-
-    //SI NO ES PATIENT NO PUEDE VER
-    if((req.headers['role'] !== 'admin')){
-        return res.status(402).send({
-            error: "Not Authorized"
-        })
-    }
-
+Department.get('/',isAuthenticated, isAuthorized({roles: ['admin'], allowSameUser:true}), async (req:Request, res:Response) => {
 
     let limit = Number(req.query['size'])
     let offset = 0 + Number(req.query['page']) - 1 * limit
@@ -31,16 +25,7 @@ Department.get('/', async (req:Request, res:Response) => {
 
 
 
-Department.get('/alldepartments', async (req: Request, res: Response) => {
-
-    
-    //SI NO ES PATIENT NO PUEDE VER
-    if(req.headers['role'] !== 'admin'){
-        return res.status(402).send({
-            error: "Not Authorized"
-        })
-    }
-
+Department.get('/alldepartments', isAuthenticated, isAuthorized({roles: ['admin','doctor', 'patient'], allowSameUser:true}), async (req: Request, res: Response) => {
 
     let list = await listDepartments(false);
     
@@ -60,16 +45,8 @@ Department.get('/alldepartments', async (req: Request, res: Response) => {
 })
 
 
-Department.post('/newDepartment', async (req: Request, res: Response) => {
+Department.post('/newDepartment', isAuthenticated, isAuthorized({roles: ['admin'], allowSameUser:true}), async (req: Request, res: Response) => {
     const Department: string = req.body.department as string;
-
-    //SI NO ES admin NO PUEDE VER
-    if(req.headers['role'] !== 'admin'){
-        return res.status(400).send({
-            error: "Not Authorized"
-        })
-    }
-
 
     if (!Department) {
         res.status(400)
@@ -78,8 +55,6 @@ Department.post('/newDepartment', async (req: Request, res: Response) => {
         })
     }
 
-    // Si tengo mi description
-    // Debo crear un nuevo TODO y guardarlo a la DB
     const newDepartmentId = await createDepartment(Department);
 
     res.status(201);
@@ -89,18 +64,9 @@ Department.post('/newDepartment', async (req: Request, res: Response) => {
 })
 
 
-Department.get('/:departmentId', async (req: Request, res: Response) => {
+Department.get('/:departmentId',isAuthenticated, isAuthorized({roles: ['admin','doctor','patient'], allowSameUser:true}), async (req: Request, res: Response) => {
 
     const departmentId = Number(req.params['departmentId']);
-
-    
-    //SI NO ES PATIENT NO PUEDE VER
-    if(req.headers['role'] !== 'admin'){
-        return res.status(402).send({
-            error: "Not Authorized"
-        })
-    }
-
 
     if (departmentId <= 0) {
         res.status(400);
@@ -126,18 +92,9 @@ Department.get('/:departmentId', async (req: Request, res: Response) => {
 
 })
 
-Department.put('/:departmentId', async (req: Request, res: Response) => {
+Department.put('/:departmentId', isAuthenticated, isAuthorized({roles: ['admin'], allowSameUser:true}), async (req: Request, res: Response) => {
     const departmentId = Number(req.params['departmentId']);
     const body = req.body;
-
-    
-    //SI NO ES PATIENT NO PUEDE VER
-    if(req.headers['role'] !== 'admin'){
-        return res.status(402).send({
-            error: "Not Authorized"
-        })
-    }
-
 
     if (departmentId <= 0) {
         res.status(400);
@@ -147,8 +104,6 @@ Department.put('/:departmentId', async (req: Request, res: Response) => {
     }
 
     const affectedRows = await updateDepartmentById(departmentId, body);
-    console.log("----------------")
-    console.log(affectedRows);
     if (!affectedRows) {
 
         res.status(500);
@@ -174,18 +129,9 @@ Department.put('/:departmentId', async (req: Request, res: Response) => {
 
 
 
-Department.delete('/:departmentId', async (req: Request, res: Response) => {
+Department.delete('/:departmentId', isAuthenticated, isAuthorized({roles: ['admin'], allowSameUser:true}), async (req: Request, res: Response) => {
     const departmentId = Number(req.params['departmentId']);
-
-    
-    //SI NO ES PATIENT NO PUEDE VER
-    if(req.headers['role'] !== 'admin'){
-        return res.status(402).send({
-            error: "Not Authorized"
-        })
-    }
-
-    
+ 
     if (departmentId <= 0) {
         res.status(400);
         return res.send({

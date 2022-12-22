@@ -49,7 +49,7 @@ exports.User = (0, express_1.Router)();
     Only allow admin users to be created via your DBMS shell and not expose this role to your server by any means. (DONE)
     Create a login endpoint where you need to compare the password via Hashing (you can skip all of this if you wish by using Firebase) and return a session token using JWT (DONE)
     Create a middleware that will check if a user is authenticated and what role it has (DONE)
-    A user can call an endpoint to disable its account (this is a soft-delete operation) is_active = true|false
+    A user can call an endpoint to disable its account (this is a soft-delete operation) is_active = true|false (DONE)
     These requirements can be changed later.
 
     ******************************************************************
@@ -57,7 +57,6 @@ exports.User = (0, express_1.Router)();
 */
 //Allow a patient to sign up to your system by creating an endpoint without needing to authenticate 
 exports.UserRouter.post('/newUser/patient', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log('se creo un paciente');
     const { uid, displayName, email, password, role } = req.body;
     if (!displayName || !email || !password) {
         return res.status(400).send({ error: 'Missing fields' });
@@ -88,38 +87,6 @@ exports.UserRouter.get('/:userId', isAuthentificated_1.isAuthenticated, (0, isAu
         return res.status(500).send({ error: 'something went wrong' });
     }
 }));
-/*
-UserRouter.get('/:userId', isAuthenticated, isAuthorized({ roles: ['admin'], allowSameUser: true }), async (req:Request, res: Response) => {
-    try {
-        const users = await getAllUsers();
-        return res.status(200).send(users);
-    } catch (error) {
-        console.error(error);
-        return res.status(500).send({error: 'something went wrong'})
-    }
-})
- */
-/* UserRouter.post('/newUser',  isAuthenticated, isAuthorized({roles: ['admin'], allowSameUser:true}), async (req:Request, res: Response) => {
-   
-
-    const { uid, displayName, email, password, role}  = req.body
-
-    if (!displayName || !email || !password || !role) {
-        return res.status(400).send({error: 'Missing fields'})
-    }
-
-    try {
-        const userId = await createUser(displayName, email, password, role);
-        console.log(userId)
-
-        return res.status(201).send({
-            userId
-        })
-    } catch (error) {
-        res.status(500).send({error: 'something went wrong'})
-    }
-});
- */
 //Disable Account
 exports.UserRouter.patch('/disable/:uid', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['doctor', 'patient'], allowSameUser: true }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let uid = req.params.uid;
@@ -146,8 +113,8 @@ exports.UserRouter.patch('/disable/:uid', isAuthentificated_1.isAuthenticated, (
                 Admin Module Requirement
    ***************************************************
 
-    Create an endpoint where an admin can create a new doctor account (user).
-    Create an endpoint that can modify the is_active property from the User model back to true.
+    Create an endpoint where an admin can create a new doctor account (user). (DONE)
+    Create an endpoint that can modify the is_active property from the User model back to true. (DONE)
 
 */
 /* Create an endpoint where an admin can create a new doctor account (user). */
@@ -187,61 +154,3 @@ exports.UserRouter.patch('/enable/:uid', isAuthentificated_1.isAuthenticated, (0
         res.status(500).send({ error: 'something went wrong' });
     }
 }));
-/*
-UserRouter.put('/update/:uid', async (req: Request, res: Response) => {
-
-    let uid = req.params.uid;
-    const { displayName, email, password } = req.body;
-
-    try {
-        const updatedUser = await updateUser(uid, displayName, email, password);
-        if (!updatedUser) {
-            return res.status(400).send({
-                error: "invalid id"
-            })
-        }
-        res.status(201).send({
-            updatedUser
-        })
-
-    } catch (error) {
-        res.status(500).send({ error: 'something went wrong' });
-    }
-})
-
-UserRouter.get('/', async (_req: Request, res: Response) => {
-
-    try {
-        const users = await getAllUsers();
-        res.status(202).send({
-            users
-        })
-
-    }
-    catch (error) {
-        res.status(500).send({ error: 'something went wrong' });
-    }
-})
-
-
-
-UserRouter.get('/:uid', async (req: Request, res: Response) => {
-
-    let uid = req.params.uid;
-
-    try {
-        const user = await readUser(uid);
-        if (!user) {
-            return res.status(400).send({
-                error: "invalid id"
-            })
-        }
-        res.status(202).send({
-            user
-        })
-
-    }
-    catch (error) {
-        res.status(500).send({ error: 'something went wrong' });
-    }
-}) */ 

@@ -10,16 +10,7 @@ export const PatientInfo = Router();
 
 //pagination
 
-PatientInfo.get('/', async (req:Request, res:Response) => {
-
-
-    //SI NO ES PATIENT NO PUEDE VER
-    if(req.headers['role'] !== 'patient'){
-        return res.status(402).send({
-            error: "Not Authorized"
-        })
-    }
-
+PatientInfo.get('/',  isAuthenticated, isAuthorized({roles: ['admin'], allowSameUser:false}),async (req:Request, res:Response) => {
 
     let limit = Number(req.query['size'])
     let offset = 0 + Number(req.query['page']) - 1 * limit
@@ -33,19 +24,9 @@ PatientInfo.get('/', async (req:Request, res:Response) => {
 
 
 
-PatientInfo.get('/allpatients', async (req: Request, res: Response) => {
-
-    
-    //SI NO ES PATIENT NO PUEDE VER
-    if(req.headers['role'] !== 'patient'){
-        return res.status(402).send({
-            error: "Not Authorized"
-        })
-    }
-
+PatientInfo.get('/allpatients',  isAuthenticated, isAuthorized({roles: ['admin'], allowSameUser:false}), async (req: Request, res: Response) => {
 
     let list = await listPatient(false);
-    
 
     if (!list) {
         res.status(400);
@@ -76,8 +57,6 @@ PatientInfo.post('/newPatient', isAuthenticated, isAuthorized({roles: ['patient'
         })
     }
 
-    // Si tengo mi description
-    // Debo crear un nuevo TODO y guardarlo a la DB
     const newPatientId = await createPatientInfo(FullName, UserId,  Birthdate);
 
     res.status(201);
@@ -87,62 +66,28 @@ PatientInfo.post('/newPatient', isAuthenticated, isAuthorized({roles: ['patient'
 })
 
 
-PatientInfo.get('/:patienInfoId', async (req: Request, res: Response) => {
+PatientInfo.get('/:patienInfoId',  isAuthenticated, isAuthorized({roles: ['admin', 'patient'], allowSameUser:true}), async (req: Request, res: Response) => {
 
     const PatientId = Number(req.params['patienInfoId']);
-
-    
-    //SI NO ES PATIENT NO PUEDE VER
-    if(req.headers['role'] !== 'patient'){
-        return res.status(402).send({
-            error: "Not Authorized"
-        })
-    }
-
-
-    if (PatientId <= 0) {
-        res.status(400);
-        return res.send({
-            error: 'Invalid id'
-        })
-    }
-
     const foundPatient = await fetchPatientById(PatientId);
 
     if (!foundPatient) {
 
         res.status(400)
         return res.send({
-            error: 'Todo not found.'
+            error: 'Patient not found.'
         })
 
     }
 
-    // TodoId es mayor a 0 y Todo con el TodoId existe en la DB
     res.status(200);
     res.send(foundPatient);
 
 })
 
-PatientInfo.put('/:patientId', async (req: Request, res: Response) => {
+PatientInfo.put('/:patientId',  isAuthenticated, isAuthorized({roles: ['admin', 'patient'], allowSameUser:true}), async (req: Request, res: Response) => {
     const patientId = Number(req.params['patientId']);
     const body = req.body;
-
-    
-    //SI NO ES PATIENT NO PUEDE VER
-    if(req.headers['role'] !== 'patient'){
-        return res.status(402).send({
-            error: "Not Authorized"
-        })
-    }
-
-
-    if (patientId <= 0) {
-        res.status(400);
-        return res.send({
-            error: 'Invalid id'
-        })
-    }
 
     const affectedRows = await updatePatientById(patientId, body);
     console.log("----------------")
@@ -172,25 +117,8 @@ PatientInfo.put('/:patientId', async (req: Request, res: Response) => {
 
 
 
-PatientInfo.delete('/:patientId', async (req: Request, res: Response) => {
+PatientInfo.delete('/:patientId', isAuthenticated, isAuthorized({roles: ['admin', 'patient'], allowSameUser:true}), async (req: Request, res: Response) => {
     const patientId = Number(req.params['patientId']);
-
-    
-    //SI NO ES PATIENT NO PUEDE VER
-    if(req.headers['role'] !== 'patient'){
-        return res.status(402).send({
-            error: "Not Authorized"
-        })
-    }
-
-    
-    if (patientId <= 0) {
-        res.status(400);
-        return res.send({
-            error: 'Invalid id'
-        })
-    }
-
     const ar = await deletePatientById(patientId);
 
     if (!ar)  {

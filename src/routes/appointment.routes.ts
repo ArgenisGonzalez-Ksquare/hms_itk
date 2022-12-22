@@ -1,9 +1,10 @@
 import { Router, Request, Response } from 'express';
 import { userInfo } from 'os';
-import { fetchAppointmentByDoctorId, listAppointment, paginatedList, createAppointment, updateAppointmentById, fetchAppointmentById, deleteAppointmentById, fetchAppointmentByPatientId, fetchAppointmentByDate, fetchAppointmentByIsDelete, listAppointmentForPatient, fetchAppointmentByOnlyPatientId } from '../controllers/appointment.repo';
+import { fetchAppointmentByDoctorId, listAppointment, paginatedList, createAppointment, updateAppointmentById, fetchAppointmentById, deleteAppointmentById, fetchAppointmentByPatientId, fetchAppointmentByDate, fetchAppointmentByIsDelete, listAppointmentForPatient, fetchAppointmentByOnlyPatientId, paginatedAllAppointments, fetchAppointmentByOrder, paginatedListDoctor } from '../controllers/appointment.repo';
 import { isAuthenticated } from "../middlewares/isAuthentificated";
 import { isAuthorized } from "../middlewares/isAuthorized";
 import * as admin from 'firebase-admin';
+import { fetchDoctorById, fetchDoctorByUID } from '../controllers/doctorInfo.repo';
 
 
 export const Appointment = Router();
@@ -23,17 +24,17 @@ export const Appointment = Router();
  */
 
 /* ************************* L I S T ****************************************** */
-Appointment.get('/allAppointment/:patientID', async (req: Request, res: Response) => {
+Appointment.get('/allAppointment', isAuthenticated, isAuthorized({roles: ['patient'], allowSameUser:true}), async (req: Request, res: Response) => {
 
-    const appointmentId: string = req.params['patientID'] as string;
+    const appointmentId: string = res.locals.uid as string;
+    console.log(appointmentId)
 
-    let enable:boolean = Boolean(req.query['enable'])
-    console.log(enable)
-    let list = await listAppointmentForPatient(appointmentId, enable);
+    
+    let list = await listAppointmentForPatient(appointmentId);
 
     
 
-    if (!list) {
+    if (list.length === 0) {
         res.status(400);
         return res.send({
             error: 'Empty List'
@@ -55,10 +56,20 @@ Appointment.post('/newAppointment', isAuthenticated, isAuthorized({roles: ['pati
     const doctorInfo_id: string = req.body.doctorInfo_id as string;
     const date: Date = req.body.date as Date;
 
+    
+
     if (!patientInfo_id || !doctorInfo_id || !date) {
         res.status(400)
         return res.send({
             message: 'Some information is missing'
+        })
+    }
+
+    const doctorExists = await fetchDoctorByUID(doctorInfo_id);
+
+    if(doctorExists?.length === 0){
+        return res.send({
+            Message: 'Sorry, this doctor UID dont exits'
         })
     }
 
@@ -145,7 +156,7 @@ Appointment.delete('/:appointmentId',  isAuthenticated, isAuthorized({roles: ['p
 
 Appointment.get('/', isAuthenticated, isAuthorized({roles: ['patient'], allowSameUser:true}), async (req:Request, res:Response) => {
 
-
+    console.log('sds')
     let limit = Number(req.query['size'])
     let offset = 0 + Number(req.query['page']) - 1 * limit
     const uid = res.locals.uid;
@@ -164,8 +175,8 @@ Appointment.get('/', isAuthenticated, isAuthorized({roles: ['patient'], allowSam
 
     Create an endpoint that reads from the same Model created in the previous model but only returns the appointments assigned to this doctor (Done)
     Create an endpoint that allows a doctor to modify the date or time of the appointment and only that. (Done)
-    Create filters that allow a doctor to get more specific information like byDate, byPatient, and orderBy=asc|desc. (Almost Done)
-    Create pagination for this resource 
+    Create filters that allow a doctor to get more specific information like byDate, byPatient, and orderBy=asc|desc. (Done)
+    Create pagination for this resource (DONE)
     Only a user with the role of doctor can access these endpoints.  (Done)
     Any requirements of this module can change at a later stage
 
@@ -173,15 +184,11 @@ Appointment.get('/', isAuthenticated, isAuthorized({roles: ['patient'], allowSam
     ------------------------------------------------------------------------------------
  */
 
-/* ************************* L I S T ****************************************** */
-
-
 /* Create an endpoint that reads from the same Model created in the previous model but only returns the appointments assigned to this doctor */
 
 Appointment.get('/doctor/myAppointments/', isAuthenticated, isAuthorized({roles: ['doctor'], allowSameUser:true}),async (req: Request, res: Response) => {
 
     const doctorId = res.locals.uid;
-
     const foundAppointment = await fetchAppointmentByDoctorId(doctorId);
 
     if (!foundAppointment) {
@@ -193,7 +200,6 @@ Appointment.get('/doctor/myAppointments/', isAuthenticated, isAuthorized({roles:
 
     }
 
-    // TodoId es mayor a 0 y Todo con el TodoId existe en la DB
     res.status(200);
     res.send(foundAppointment);
 
@@ -263,7 +269,6 @@ Appointment.get('/doctor/myPatientAppointments/:patientId', isAuthenticated, isA
         })
     }
 
-    // TodoId es mayor a 0 y Todo con el TodoId existe en la DB
     res.status(200);
     res.send(foundAppointment);
 
@@ -273,7 +278,6 @@ Appointment.get('/doctor/myPatientAppointments/:patientId', isAuthenticated, isA
 Appointment.get('/doctor/AppointmensPerDays', isAuthenticated, isAuthorized({roles: ['doctor'], allowSameUser:true}), async (req: Request, res: Response) => {
 
     const date: Date = req.body.date as Date;
-    console.log(res.locals)
     if (!date) {
         res.status(400);
         return res.send({
@@ -292,10 +296,54 @@ Appointment.get('/doctor/AppointmensPerDays', isAuthenticated, isAuthorized({rol
 
     }
 
-    // TodoId es mayor a 0 y Todo con el TodoId existe en la DB
     res.status(200);
     res.send(foundAppointment);
 
+})
+
+//Filter per Order
+
+Appointment.get('/doctor/AppointmentsOrder/', isAuthenticated, isAuthorized({roles: ['doctor'], allowSameUser:true}), async (req: Request, res: Response) => {
+
+    const order:string =  String(req.query['order']).toUpperCase();
+
+    
+    if(order === 'DESC' || order === 'ASC'){
+        const foundAppointment = await fetchAppointmentByOrder(res.locals.uid, order);
+
+        if (!foundAppointment) {
+
+            res.status(400)
+            return res.send({
+                error: 'Appointments not found.'
+            })
+        }
+
+        res.status(200);
+        res.send(foundAppointment);
+    }
+
+    return res.status(400).send({
+            message:'Just ASC or DESC are allowed'
+        })
+    
+
+
+})
+
+/* ************************** P A G I N A T I O N ******************************************* */
+
+Appointment.get('/doctor/pagination', isAuthenticated, isAuthorized({roles: ['doctor'], allowSameUser:true}), async (req:Request, res:Response) => {
+
+    console.log(res.locals.role)
+    let limit = Number(req.query['size'])
+    let offset = 0 + Number(req.query['page']) - 1 * limit
+    const uid = res.locals.uid;
+
+    const list = await paginatedListDoctor(uid,limit,offset);
+    
+    res.status(200);
+    res.send(list); 
 })
 
 
@@ -307,7 +355,7 @@ Appointment.get('/doctor/AppointmensPerDays', isAuthenticated, isAuthorized({rol
     Create an endpoint where an admin can create a new doctor account (user). (done) 
     Create an endpoint that can modify the is_active property from the User model back to true. (done)
     Create an endpoint that would LIST all the appointments in the table (done)
-    [Appointments] Create pagination filters for the previous endpoint 
+    [Appointments] Create pagination filters for the previous endpoint  (done)
     [Appointments] Create a filter where you can pass a patientId and only see the appointments of that user  (done)
     [Appointments] Create a filter where you can pass a doctorId and only see the appointments where the doctor is in charge (done)
     [Appointments] Create a filter where you can receive the information based on is_deleted property (done)
@@ -318,14 +366,41 @@ Appointment.get('/doctor/AppointmensPerDays', isAuthenticated, isAuthorized({rol
     ------------------------------------------------------------------------------------
  */
 
+/* ************************** P A G I N A T I O N ******************************************* */
+
+Appointment.get('/all/PaginatedAppointment', isAuthenticated, isAuthorized({roles: ['admin'], allowSameUser:false}), async (req: Request, res: Response) => {
+
+    let limit = Number(req.query['size'])
+    let offset = 0 + Number(req.query['page']) - 1 * limit
+    let boolean = Boolean(req.query['disable']);
+    
+    let list = await paginatedAllAppointments(limit, offset, boolean);
+    
+    
+    if (!list) {
+        res.status(400);
+        return res.send({
+            error: 'Empty List'
+        })
+    }
+
+    res.status(200);
+    res.send({
+        list
+    });
+
+})
+
+
 /* ************************* L I S T ****************************************** */
 Appointment.get('/all/Appointment',  isAuthenticated, isAuthorized({roles: ['admin'], allowSameUser:false}), async (req: Request, res: Response) => {
 
 
-    let list = await listAppointment(false);
+    let list = await listAppointment(true);
+    console.log(list)
     
     
-    if (!list) {
+    if (list.length === 0) {
         res.status(400);
         return res.send({
             error: 'Empty List'

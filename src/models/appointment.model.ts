@@ -38,7 +38,7 @@ export const initAppointmentInfo = (sequelize: Sequelize) => {
         date: DataTypes.DATE,
         is_active: {
             type: DataTypes.BOOLEAN,
-            defaultValue: false
+            defaultValue: true
         }
     
 },{

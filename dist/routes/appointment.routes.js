@@ -14,6 +14,7 @@ const express_1 = require("express");
 const appointment_repo_1 = require("../controllers/appointment.repo");
 const isAuthentificated_1 = require("../middlewares/isAuthentificated");
 const isAuthorized_1 = require("../middlewares/isAuthorized");
+const doctorInfo_repo_1 = require("../controllers/doctorInfo.repo");
 exports.Appointment = (0, express_1.Router)();
 /* ------------------------------------------------------------------------------------
     Patient Module - Requirements
@@ -29,12 +30,11 @@ exports.Appointment = (0, express_1.Router)();
     ------------------------------------------------------------------------------------
  */
 /* ************************* L I S T ****************************************** */
-exports.Appointment.get('/allAppointment/:patientID', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const appointmentId = req.params['patientID'];
-    let enable = Boolean(req.query['enable']);
-    console.log(enable);
-    let list = yield (0, appointment_repo_1.listAppointmentForPatient)(appointmentId, enable);
-    if (!list) {
+exports.Appointment.get('/allAppointment', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['patient'], allowSameUser: true }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const appointmentId = res.locals.uid;
+    console.log(appointmentId);
+    let list = yield (0, appointment_repo_1.listAppointmentForPatient)(appointmentId);
+    if (list.length === 0) {
         res.status(400);
         return res.send({
             error: 'Empty List'
@@ -54,6 +54,12 @@ exports.Appointment.post('/newAppointment', isAuthentificated_1.isAuthenticated,
         res.status(400);
         return res.send({
             message: 'Some information is missing'
+        });
+    }
+    const doctorExists = yield (0, doctorInfo_repo_1.fetchDoctorByUID)(doctorInfo_id);
+    if ((doctorExists === null || doctorExists === void 0 ? void 0 : doctorExists.length) === 0) {
+        return res.send({
+            Message: 'Sorry, this doctor UID dont exits'
         });
     }
     const newApplistAppointmentId = yield (0, appointment_repo_1.createAppointment)(patientInfo_id, doctorInfo_id, date);
@@ -113,6 +119,7 @@ exports.Appointment.delete('/:appointmentId', isAuthentificated_1.isAuthenticate
 }));
 /* ************************** P A G I N A T I O N ******************************************* */
 exports.Appointment.get('/', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['patient'], allowSameUser: true }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log('sds');
     let limit = Number(req.query['size']);
     let offset = 0 + Number(req.query['page']) - 1 * limit;
     const uid = res.locals.uid;
@@ -127,15 +134,14 @@ exports.Appointment.get('/', isAuthentificated_1.isAuthenticated, (0, isAuthoriz
 
     Create an endpoint that reads from the same Model created in the previous model but only returns the appointments assigned to this doctor (Done)
     Create an endpoint that allows a doctor to modify the date or time of the appointment and only that. (Done)
-    Create filters that allow a doctor to get more specific information like byDate, byPatient, and orderBy=asc|desc. (Almost Done)
-    Create pagination for this resource
+    Create filters that allow a doctor to get more specific information like byDate, byPatient, and orderBy=asc|desc. (Done)
+    Create pagination for this resource (DONE)
     Only a user with the role of doctor can access these endpoints.  (Done)
     Any requirements of this module can change at a later stage
 
     ************************************************************************************
     ------------------------------------------------------------------------------------
  */
-/* ************************* L I S T ****************************************** */
 /* Create an endpoint that reads from the same Model created in the previous model but only returns the appointments assigned to this doctor */
 exports.Appointment.get('/doctor/myAppointments/', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['doctor'], allowSameUser: true }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const doctorId = res.locals.uid;
@@ -146,7 +152,6 @@ exports.Appointment.get('/doctor/myAppointments/', isAuthentificated_1.isAuthent
             error: 'Appointment not found.'
         });
     }
-    // TodoId es mayor a 0 y Todo con el TodoId existe en la DB
     res.status(200);
     res.send(foundAppointment);
 }));
@@ -196,14 +201,12 @@ exports.Appointment.get('/doctor/myPatientAppointments/:patientId', isAuthentifi
             error: 'Todo not found.'
         });
     }
-    // TodoId es mayor a 0 y Todo con el TodoId existe en la DB
     res.status(200);
     res.send(foundAppointment);
 }));
 //Filter by date 
 exports.Appointment.get('/doctor/AppointmensPerDays', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['doctor'], allowSameUser: true }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const date = req.body.date;
-    console.log(res.locals);
     if (!date) {
         res.status(400);
         return res.send({
@@ -217,9 +220,36 @@ exports.Appointment.get('/doctor/AppointmensPerDays', isAuthentificated_1.isAuth
             error: 'Appointment not found.'
         });
     }
-    // TodoId es mayor a 0 y Todo con el TodoId existe en la DB
     res.status(200);
     res.send(foundAppointment);
+}));
+//Filter per Order
+exports.Appointment.get('/doctor/AppointmentsOrder/', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['doctor'], allowSameUser: true }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const order = String(req.query['order']).toUpperCase();
+    if (order === 'DESC' || order === 'ASC') {
+        const foundAppointment = yield (0, appointment_repo_1.fetchAppointmentByOrder)(res.locals.uid, order);
+        if (!foundAppointment) {
+            res.status(400);
+            return res.send({
+                error: 'Appointments not found.'
+            });
+        }
+        res.status(200);
+        res.send(foundAppointment);
+    }
+    return res.status(400).send({
+        message: 'Just ASC or DESC are allowed'
+    });
+}));
+/* ************************** P A G I N A T I O N ******************************************* */
+exports.Appointment.get('/doctor/pagination', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['doctor'], allowSameUser: true }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log(res.locals.role);
+    let limit = Number(req.query['size']);
+    let offset = 0 + Number(req.query['page']) - 1 * limit;
+    const uid = res.locals.uid;
+    const list = yield (0, appointment_repo_1.paginatedListDoctor)(uid, limit, offset);
+    res.status(200);
+    res.send(list);
 }));
 /* ------------------------------------------------------------------------------------
     Admin Module - Requirements
@@ -229,7 +259,7 @@ exports.Appointment.get('/doctor/AppointmensPerDays', isAuthentificated_1.isAuth
     Create an endpoint where an admin can create a new doctor account (user). (done)
     Create an endpoint that can modify the is_active property from the User model back to true. (done)
     Create an endpoint that would LIST all the appointments in the table (done)
-    [Appointments] Create pagination filters for the previous endpoint
+    [Appointments] Create pagination filters for the previous endpoint  (done)
     [Appointments] Create a filter where you can pass a patientId and only see the appointments of that user  (done)
     [Appointments] Create a filter where you can pass a doctorId and only see the appointments where the doctor is in charge (done)
     [Appointments] Create a filter where you can receive the information based on is_deleted property (done)
@@ -239,10 +269,28 @@ exports.Appointment.get('/doctor/AppointmensPerDays', isAuthentificated_1.isAuth
     ************************************************************************************
     ------------------------------------------------------------------------------------
  */
+/* ************************** P A G I N A T I O N ******************************************* */
+exports.Appointment.get('/all/PaginatedAppointment', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['admin'], allowSameUser: false }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    let limit = Number(req.query['size']);
+    let offset = 0 + Number(req.query['page']) - 1 * limit;
+    let boolean = Boolean(req.query['disable']);
+    let list = yield (0, appointment_repo_1.paginatedAllAppointments)(limit, offset, boolean);
+    if (!list) {
+        res.status(400);
+        return res.send({
+            error: 'Empty List'
+        });
+    }
+    res.status(200);
+    res.send({
+        list
+    });
+}));
 /* ************************* L I S T ****************************************** */
 exports.Appointment.get('/all/Appointment', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['admin'], allowSameUser: false }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    let list = yield (0, appointment_repo_1.listAppointment)(false);
-    if (!list) {
+    let list = yield (0, appointment_repo_1.listAppointment)(true);
+    console.log(list);
+    if (list.length === 0) {
         res.status(400);
         return res.send({
             error: 'Empty List'

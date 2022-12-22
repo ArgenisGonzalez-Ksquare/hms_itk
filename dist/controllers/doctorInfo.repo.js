@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteDoctorById = exports.updateDoctorById = exports.fetchDoctorById = exports.createDoctorInfo = exports.listDoctor = exports.paginatedList = void 0;
+exports.deleteDoctorById = exports.updateDoctorById = exports.fetchDoctorByUID = exports.fetchDoctorById = exports.createDoctorInfo = exports.listDoctor = exports.paginatedList = void 0;
 const doctorInfo_model_1 = require("../models/doctorInfo.model");
 // Create operation
 const paginatedList = (pLimit, pOffset) => __awaiter(void 0, void 0, void 0, function* () {
@@ -66,6 +66,22 @@ const fetchDoctorById = (id) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.fetchDoctorById = fetchDoctorById;
+const fetchDoctorByUID = (uid) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const foundDoctor = yield doctorInfo_model_1.DoctorInfo.findAll({
+            attributes: ['user_id'],
+            where: {
+                user_id: uid
+            }
+        });
+        return foundDoctor;
+    }
+    catch (error) {
+        console.error(error);
+        return null;
+    }
+});
+exports.fetchDoctorByUID = fetchDoctorByUID;
 const updateDoctorById = (id, DoctorModel) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const foo = yield doctorInfo_model_1.DoctorInfo.update({

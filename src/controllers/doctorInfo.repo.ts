@@ -66,6 +66,24 @@ export const fetchDoctorById = async (id: number) => {
     }
 }
 
+export const fetchDoctorByUID = async (uid: string) => {
+    try {
+        const foundDoctor = await DoctorInfo.findAll({
+            attributes:['user_id'],
+            where:{
+                user_id:uid
+            }
+        });
+
+        return foundDoctor;
+
+    } catch (error) {
+        console.error(error);
+
+        return null;
+    }
+}
+
 
 export const updateDoctorById = async (id: number, DoctorModel: InferAttributes<DoctorInfo>) => {
 
