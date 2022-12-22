@@ -106,8 +106,6 @@ Appointment.get('/:appointmentId', isAuthenticated, isAuthorized({roles: ['patie
 
     }
 
-    // TodoId es mayor a 0 y Todo con el TodoId existe en la DB
-
     if(foundAppointment.patientInfo_id !== res.locals.uid){
         res.status(400).send({
             message:'This appointment ID dont belongs to you'
@@ -454,7 +452,6 @@ Appointment.get('/AdminAppointmentsPatients/:patientId',  isAuthenticated, isAut
         })
     }
 
-    // TodoId es mayor a 0 y Todo con el TodoId existe en la DB
     res.status(200);
     res.send(foundAppointment);
 
@@ -482,6 +479,36 @@ Appointment.get('/admin/DeletesAppointment/',  isAuthenticated, isAuthorized({ro
 })
 
 
+//[Appointments] Create a filter where you can modify the order of the information do this by the patientId and the doctorId 
+
+Appointment.get('/admin/filterPatientOrDoctor/',  isAuthenticated, isAuthorized({roles: ['admin'], allowSameUser:false}), async (req: Request, res: Response) => {
+
+    let doctor_id = String(req.query['doctor_id']);
+    let patient_id = String(req.query['patient_id']);
+    let foundAppointment: any;
+
+    if(doctor_id.length > 9){
+        foundAppointment = await fetchAppointmentByDoctorId(doctor_id);
+    }
+
+    if(patient_id.length  > 9){
+        foundAppointment = await listAppointmentForPatient(patient_id);  
+    }
+    
+    
+    if (!foundAppointment) {
+    
+        res.status(400)
+        return res.send({
+            error: 'Appointment not found.'
+        })
+
+    }
 
 
+
+    res.status(200);
+    res.send(foundAppointment);
+
+})
 

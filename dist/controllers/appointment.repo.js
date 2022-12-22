@@ -87,7 +87,6 @@ const listAppointmentForPatient = (uid) => __awaiter(void 0, void 0, void 0, fun
             is_active: true
         }
     });
-    console.log(res);
     return res;
 });
 exports.listAppointmentForPatient = listAppointmentForPatient;

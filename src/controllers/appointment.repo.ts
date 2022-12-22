@@ -87,7 +87,6 @@ export const listAppointmentForPatient =async (uid: string) => {
             is_active: true
         }
     })
-    console.log(res)
     return res;
 }
 
@@ -158,7 +157,6 @@ export const fetchAppointmentByPatientId = async (doctorUID:string, patientInfo_
         return null;
     }
 }
-
 
 export const fetchAppointmentByOrder = async (doctorUID:string, Porder:string) => {
     try {

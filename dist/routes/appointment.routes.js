@@ -85,7 +85,6 @@ exports.Appointment.get('/:appointmentId', isAuthentificated_1.isAuthenticated, 
             error: 'Appointment not found.'
         });
     }
-    // TodoId es mayor a 0 y Todo con el TodoId existe en la DB
     if (foundAppointment.patientInfo_id !== res.locals.uid) {
         res.status(400).send({
             message: 'This appointment ID dont belongs to you'
@@ -326,7 +325,6 @@ exports.Appointment.get('/AdminAppointmentsPatients/:patientId', isAuthentificat
             error: 'Appointment not found.'
         });
     }
-    // TodoId es mayor a 0 y Todo con el TodoId existe en la DB
     res.status(200);
     res.send(foundAppointment);
 }));
@@ -341,6 +339,26 @@ exports.Appointment.get('/admin/DeletesAppointment/', isAuthentificated_1.isAuth
         });
     }
     // TodoId es mayor a 0 y Todo con el TodoId existe en la DB
+    res.status(200);
+    res.send(foundAppointment);
+}));
+//[Appointments] Create a filter where you can modify the order of the information do this by the patientId and the doctorId 
+exports.Appointment.get('/admin/filterPatientOrDoctor/', isAuthentificated_1.isAuthenticated, (0, isAuthorized_1.isAuthorized)({ roles: ['admin'], allowSameUser: false }), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    let doctor_id = String(req.query['doctor_id']);
+    let patient_id = String(req.query['patient_id']);
+    let foundAppointment;
+    if (doctor_id.length > 9) {
+        foundAppointment = yield (0, appointment_repo_1.fetchAppointmentByDoctorId)(doctor_id);
+    }
+    if (patient_id.length > 9) {
+        foundAppointment = yield (0, appointment_repo_1.listAppointmentForPatient)(patient_id);
+    }
+    if (!foundAppointment) {
+        res.status(400);
+        return res.send({
+            error: 'Appointment not found.'
+        });
+    }
     res.status(200);
     res.send(foundAppointment);
 }));
